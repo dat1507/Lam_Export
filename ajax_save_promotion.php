@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     if ($stmt = $db->prepare($query)) {
-        $stmt->bind_param("sssiiidsi", 
+        $stmt->bind_param("sssiidssi", 
             $promo_name, 
             $promo_code, 
             $promo_type, 

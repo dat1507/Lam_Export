@@ -274,12 +274,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div> 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Mô tả ngắn</label>
-                    <textarea name="des1" rows="3" class="w-full border rounded-lg p-2.5"><?= htmlspecialchars($product['des1']) ?></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Mô tả chi tiết</label>
-                    <textarea name="des2" rows="4" class="w-full border rounded-lg p-2.5"><?= htmlspecialchars($product['des2']) ?></textarea>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Mô tả</label>
+                    <textarea name="des1" rows="5" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Nhập mô tả sản phẩm..."><?= htmlspecialchars($product['des1'] ?? '') ?></textarea>
                 </div>
             </div>
         </div>
@@ -291,6 +287,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </form>
 </div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -6,16 +6,28 @@ require_once 'admin_header.php';
 $sql_customers = "SELECT * FROM customers ORDER BY customer_name ASC";
 $result_customers = mysqli_query($conn, $sql_customers);
 
-$sql_promos = "SELECT promo_code, buy_qty, get_qty FROM promotions WHERE is_active = 1 AND promo_type = 'buy_x_get_y'";
+// Lấy tất cả promotion đang active (bao gồm cả discount_amount và discount_percent)
+$sql_promos = "SELECT promo_code, promo_type, buy_qty, get_qty, discount_val, min_order_value, start_date, end_date 
+              FROM promotions 
+              WHERE is_active = 1";
 $result_promos = mysqli_query($conn, $sql_promos);
 
 $promo_rules_array = [];
 
 if ($result_promos) {
+    $now = date('Y-m-d H:i:s');
     while ($row = mysqli_fetch_assoc($result_promos)) {
+        // Kiểm tra thời gian hiệu lực
+        $valid_start = empty($row['start_date']) || $row['start_date'] <= $now;
+        $valid_end   = empty($row['end_date'])   || $row['end_date']   >= $now;
+        if (!$valid_start || !$valid_end) continue; // Bỏ qua mã hết hạn
+
         $promo_rules_array[strtoupper($row['promo_code'])] = [
-            'buy' => (int)$row['buy_qty'],
-            'get' => (int)$row['get_qty']
+            'type'      => $row['promo_type'],
+            'buy'       => (int)$row['buy_qty'],
+            'get'       => (int)$row['get_qty'],
+            'val'       => (float)$row['discount_val'],
+            'min_order' => (float)$row['min_order_value'],
         ];
     }
 }
@@ -218,6 +230,7 @@ $result_products = mysqli_query($conn, $sql_products);
             let btnEl = document.getElementById('btn_apply_promo');
             let inputCode = inputEl.value.trim().toUpperCase();
 
+            // Nếu đã có mã đang ạp dụng → Hủy mã
             if (activePromoCode !== "") {
                 activePromoCode = "";
                 inputEl.value = "";
@@ -228,15 +241,21 @@ $result_products = mysqli_query($conn, $sql_products);
                 return;
             }
 
-            if (inputCode === "") {
-                return;
-            }
+            if (inputCode === "") return;
 
-            if (PROMO_RULES[inputCode]) {
+            const rule = PROMO_RULES[inputCode];
+
+            if (rule) {
+                // Kiểm tra điều kiện đơn hàng tối thiểu
+                let subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+                if (rule.min_order > 0 && subtotal < rule.min_order) {
+                    alert('Giá trị đơn hàng chưa đạt mức tối thiểu ' + rule.min_order.toLocaleString('vi-VN') + 'đ để áp dụng mã này!');
+                    return;
+                }
                 activePromoCode = inputCode;
                 inputEl.disabled = true;
                 btnEl.innerText = "Hủy mã"; 
-                btnEl.className = "bg-red-100 text-red-700 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition"; // Đổi màu nút sang đỏ
+                btnEl.className = "bg-red-100 text-red-700 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition";
                 renderCart();
             } else {
                 alert('Mã khuyến mãi không hợp lệ hoặc đã hết hạn!');
@@ -359,27 +378,39 @@ $result_products = mysqli_query($conn, $sql_products);
     
             if (activePromoCode !== "" && PROMO_RULES[activePromoCode]) {
                 let rule = PROMO_RULES[activePromoCode];
-                let flatItems = [];
-                cart.forEach(item => {
-                    for(let i=0; i<item.qty; i++) { flatItems.push(item.price); }
-                });
 
-                let totalQty = flatItems.length;
-                let requiredQty = rule.buy + rule.get;
-
-                if (totalQty >= requiredQty) {
-                    let numCombos = Math.floor(totalQty / requiredQty);
-                    let freeQty = numCombos * rule.get;
-                    
-                    flatItems.sort((a, b) => a - b);
-                    for(let i=0; i<freeQty; i++) {
-                        globalPromoDiscount += flatItems[i]; 
+                if (rule.type === 'buy_x_get_y') {
+                    // ---- Loại Mua X Tặng Y ----
+                    let flatItems = [];
+                    cart.forEach(item => {
+                        for(let i=0; i<item.qty; i++) { flatItems.push(item.price); }
+                    });
+                    let totalQty = flatItems.length;
+                    let requiredQty = rule.buy + rule.get;
+                    if (totalQty >= requiredQty) {
+                        let numCombos = Math.floor(totalQty / requiredQty);
+                        let freeQty = numCombos * rule.get;
+                        flatItems.sort((a, b) => a - b); // Tặng hàng rẻ nhất
+                        for(let i=0; i<freeQty; i++) {
+                            globalPromoDiscount += flatItems[i];
+                        }
+                        promoAmountEl.innerText = '-' + globalPromoDiscount.toLocaleString('vi-VN') + 'đ';
+                        promoDisplay.classList.remove('hidden');
+                    } else {
+                        promoDisplay.classList.add('hidden');
                     }
-                    
+
+                } else if (rule.type === 'discount_percent') {
+                    // ---- Loại Giảm % ----
+                    globalPromoDiscount = (total * rule.val) / 100;
+                    promoAmountEl.innerText = '-' + Math.round(globalPromoDiscount).toLocaleString('vi-VN') + 'đ (' + rule.val + '%)';
+                    promoDisplay.classList.remove('hidden');
+
+                } else if (rule.type === 'discount_amount') {
+                    // ---- Loại Giảm tiền mặt ----
+                    globalPromoDiscount = Math.min(rule.val, total); // Không giảm quá tổng bill
                     promoAmountEl.innerText = '-' + globalPromoDiscount.toLocaleString('vi-VN') + 'đ';
                     promoDisplay.classList.remove('hidden');
-                } else {
-                    promoDisplay.classList.add('hidden');
                 }
             } else {
                 promoDisplay.classList.add('hidden');
