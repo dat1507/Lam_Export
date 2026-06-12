@@ -16,9 +16,9 @@ try {
     $errorMsg = '';
 
     if (!$name || !$phone) {
-        $errorMsg = 'Vui lòng nhập đủ tên và số điện thoại!';
+        $errorMsg = 'Please enter both name and phone number!';
     } elseif ($type === 'wholesale' && empty($address)) {
-        $errorMsg = 'Bắt buộc phải nhập Địa chỉ đối với Khách Sỉ/Đại lý!';
+        $errorMsg = 'Address is required for Wholesale/Agency customer!';
     } else {
         $isValid = true;
     }
@@ -39,23 +39,23 @@ try {
                 'id' => $new_id
             ]; 
                   $current_user = $_SESSION['admin_username'] ?? ($_SESSION['username'] ?? 'Admin');
-            $action = 'Thêm khách hàng';
+            $action = 'Add Customer';
             
             if ($type === 'wholesale') {
-                $details = "Thêm khách sỉ mới: $name (SĐT: $phone, Đ/c: $address)";
+                $details = "Add new wholesale customer: $name (Phone: $phone, Addr: $address)";
             } else {
                 // Khách lẻ nếu có nhập địa chỉ thì ghi thêm vào log, không thì thôi
-                $addr_text = !empty($address) ? ", Đ/c: $address" : "";
-                $details = "Thêm khách lẻ mới: $name (SĐT: $phone$addr_text)";
+                $addr_text = !empty($address) ? ", Addr: $address" : "";
+                $details = "Add new retail customer: $name (Phone: $phone$addr_text)";
             }
             
             logActivity($conn, $current_user, $action, $details);
 
         } else {
             if (mysqli_errno($conn) == 1062) {
-                $response = ['error' => 'Lỗi: Số điện thoại này đã tồn tại trong hệ thống!'];
+                $response = ['error' => 'Error: This phone number already exists in the system!'];
             } else {
-                $response = ['error' => 'Lỗi lưu dữ liệu: ' . mysqli_error($conn)];
+                $response = ['error' => 'Error saving data: ' . mysqli_error($conn)];
             }
         }
     } else {
@@ -63,7 +63,7 @@ try {
     }
 
 } catch (Throwable $e) {
-    $response = ['error' => 'Lỗi hệ thống: ' . $e->getMessage()];
+    $response = ['error' => 'System error: ' . $e->getMessage()];
 }
 
 ob_end_clean();

@@ -4,7 +4,7 @@ require_once 'connect.php';
 require_once 'logger.php';
 
 if (!isset($_SESSION['admin_username'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn chưa đăng nhập hoặc không có quyền!']);
+    echo json_encode(['status' => 'error', 'message' => 'You are not logged in or do not have permission!']);
     exit;
 }
 
@@ -27,7 +27,7 @@ if (!empty($data['cart'])) {
                        VALUES ($supplier_id, $total_amount, $discount_amount, $tax_amount, NOW(), '$note')";
         
         if (!mysqli_query($conn, $sql_import)) {
-            throw new Exception("Lỗi tạo phiếu nhập: " . mysqli_error($conn));
+            throw new Exception("Error creating import slip: " . mysqli_error($conn));
         }
         
         $import_id = mysqli_insert_id($conn);
@@ -44,18 +44,18 @@ if (!empty($data['cart'])) {
                            VALUES ($import_id, '$p_id', $qty, $import_price, $subtotal)";
             
             if (!mysqli_query($conn, $sql_detail)) {
-                throw new Exception("Lỗi lưu chi tiết sản phẩm: " . mysqli_error($conn));
+                throw new Exception("Error saving product details: " . mysqli_error($conn));
             }
 
             $sql_update_stock = "UPDATE products SET quantity = quantity + $qty WHERE id = '$p_id'";
             if (!mysqli_query($conn, $sql_update_stock)) {
-                throw new Exception("Lỗi cập nhật tồn kho: " . mysqli_error($conn));
+                throw new Exception("Error updating stock: " . mysqli_error($conn));
             }
 
-            $imported_items_log[] = "SP: $p_id (SL: $qty)";
+            $imported_items_log[] = "Product: $p_id (Qty: $qty)";
         }
 
-        $supplier_name = "Không xác định"; 
+        $supplier_name = "Unknown"; 
 
         if (!empty($data['supplier_id']) && $data['supplier_id'] > 0) {
             $sup_id = mysqli_real_escape_string($conn, $data['supplier_id']);
@@ -69,7 +69,7 @@ if (!empty($data['cart'])) {
         }
 
         // Lấy ghi chú
-        $note_text = !empty($data['note']) ? trim($data['note']) : "Không có";
+        $note_text = !empty($data['note']) ? trim($data['note']) : "None";
 
         if (function_exists('logActivity')) {
             $formatted_total = number_format($total_amount, 0, ',', '.');
@@ -78,9 +78,9 @@ if (!empty($data['cart'])) {
             
             $list_products = implode(', ', $imported_items_log);
             
-            $chi_tiet_log = "Nhập kho (Phiếu #$import_id) | NCC: $supplier_name | Gồm: $list_products | Tổng: {$formatted_total}đ (Thuế: {$formatted_tax}đ, CK: {$formatted_discount}đ) | Ghi chú: $note_text";
+            $chi_tiet_log = "Import stock (Receipt #$import_id) | Supplier: $supplier_name | Items: $list_products | Total: {$formatted_total}đ (Tax: {$formatted_tax}đ, Discount: {$formatted_discount}đ) | Note: $note_text";
             
-            logActivity($conn, $_SESSION['admin_username'], "Nhập hàng", $chi_tiet_log);
+            logActivity($conn, $_SESSION['admin_username'], "Import goods", $chi_tiet_log);
         }
 
         mysqli_commit($conn);
@@ -92,6 +92,6 @@ if (!empty($data['cart'])) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Giỏ hàng trống!']);
+    echo json_encode(['status' => 'error', 'message' => 'Cart is empty!']);
 }
 ?>

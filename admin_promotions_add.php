@@ -4,8 +4,8 @@ require_once 'admin_header.php';
 ?>
 <div class="max-w-4xl mx-auto px-4 py-8 h-full">
     <div class="flex items-center gap-4 mb-6">
-        <a href="admin_promotions.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Trở về</a>
-        <h1 class="text-2xl font-bold text-[#1a2954]">Thêm chương trình mới</h1>
+        <a href="admin_promotions.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Back</a>
+        <h1 class="text-2xl font-bold text-[#1a2954]">Add New Promotion</h1>
     </div>
 
     <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
@@ -14,55 +14,55 @@ require_once 'admin_header.php';
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Tên chương trình</label>
-                        <input type="text" name="promo_name" placeholder="VD: Năm du lịch Quy Nhơn" required
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Campaign Name</label>
+                        <input type="text" name="promo_name" placeholder="e.g. Quy Nhon Tourism Year" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Mã Voucher (GHI IN HOA VÀ KHÔNG DẤU)</label>
-                        <input type="text" name="promo_code" placeholder="VD: SACHITANG10" required
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Voucher Code (UPPERCASE ONLY, NO SPACES)</label>
+                        <input type="text" name="promo_code" placeholder="e.g. SACHITANG10" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm uppercase">
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Loại Khuyến Mãi</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Discount Type</label>
                     <select id="promoTypeSelect" name="promo_type" required onchange="togglePromoFields()"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm bg-white">
-                        <option value="" disabled selected>-- Chọn loại hình khuyến mãi --</option>
-                        <option value="discount_amount">Giảm tiền mặt (Trừ thẳng vào tổng bill)</option>
-                        <option value="discount_percent">Giảm theo phần trăm (%)</option>
-                        <option value="buy_x_get_y">Mua X tặng Y</option>
+                        <option value="" disabled selected>-- Select Discount Type --</option>
+                        <option value="discount_amount">Discount Amount (Deducted directly from bill)</option>
+                        <option value="discount_percent">Discount Percentage (%)</option>
+                        <option value="buy_x_get_y">Buy X Get Y</option>
                     </select>
                 </div>
 
                 <div id="discountValueField" class="mb-6 hidden">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Giá trị giảm</label>
-                    <input type="number" name="discount_val" placeholder="Nhập số tiền hoặc %"
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Discount Value</label>
+                    <input type="number" name="discount_val" placeholder="Enter amount or %"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                 </div>
 
                 <div id="buyXgetYFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 hidden">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng MUA</label>
-                        <input type="number" name="buy_qty" placeholder="VD: Mua 2"
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Buy Quantity</label>
+                        <input type="number" name="buy_qty" placeholder="e.g. Buy 2"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng TẶNG</label>
-                        <input type="number" name="get_qty" placeholder="VD: Tặng 1"
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Get Quantity</label>
+                        <input type="number" name="get_qty" placeholder="e.g. Get 1"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Ngày bắt đầu - giờ</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Start Date & Time</label>
                         <input type="datetime-local" name="start_date"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-600">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Ngày kết thúc - giờ</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">End Date & Time</label>
                         <input type="datetime-local" name="end_date"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-600">
                     </div>
@@ -76,14 +76,14 @@ require_once 'admin_header.php';
                             <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
                         </div>
                         <div class="ml-3 text-sm font-bold text-gray-700">
-                            Đang hoạt động
+                            Active
                         </div>
                     </label>
                 </div>
 
                 <div class="flex justify-end">
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition flex items-center gap-2">
-                        <span>💾</span> Lưu Khuyến Mãi
+                        <span>💾</span> Save Promotion
                     </button>
                 </div>
             </form>
@@ -123,11 +123,11 @@ require_once 'admin_header.php';
         }
     }
     document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault(); // Chặn hành động load lại trang mặc định của form
+        e.preventDefault(); // Prevent default form submission
 
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = 'Đang lưu...';
+        submitBtn.innerHTML = 'Saving...';
         submitBtn.disabled = true;
 
         let formData = new FormData(this);
@@ -142,14 +142,14 @@ require_once 'admin_header.php';
                 alert(data.message); 
                 window.location.href = 'admin_promotions.php'; 
             } else {
-                alert('Lỗi: ' + data.message);
+                alert('Error: ' + data.message);
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
-            alert('Đã xảy ra lỗi mạng hoặc server! Vui lòng thử lại.');
+            console.error('Connection Error:', error);
+            alert('A network or server error occurred! Please try again.');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         });

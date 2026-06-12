@@ -16,10 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
         $order = $stmt_check->get_result()->fetch_assoc();
 
         if (!$order) {
-            throw new Exception("Không tìm thấy đơn hàng!");
+            throw new Exception("Order not found!");
         }
         if ($order['status'] === 'Đã hủy') {
-            throw new Exception("Đơn hàng này đã được hủy từ trước.");
+            throw new Exception("This order was already canceled.");
         }
 
         $customer_id = $order['customer_id'];
@@ -52,17 +52,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
 
        
         $nhan_vien = isset($_SESSION['admin_username']) ? $_SESSION['admin_username'] : 'Admin'; 
-        $hanh_dong = "Hủy đơn hàng";
+        $hanh_dong = "Cancel order";
         $ip_address = $_SERVER['REMOTE_ADDR'];
         $fmt_debt = number_format($debt_amount, 0, ',', '.');
         
-        $chi_tiet_log = "Hủy hóa đơn #$order_id. Hệ thống đã tự động hoàn kho và trừ nợ ($fmt_debt đ).";
+        $chi_tiet_log = "Canceled invoice #$order_id. System automatically returned stock and deducted debt ($fmt_debt đ).";
         
         $stmt_log = $conn->prepare("INSERT INTO activity_logs (username, action, details, ip_address) VALUES (?, ?, ?, ?)");
         $stmt_log->bind_param("ssss", $nhan_vien, $hanh_dong, $chi_tiet_log, $ip_address);
         
         if (!$stmt_log->execute()) {
-            throw new Exception("Lỗi khi ghi lịch sử hoạt động!");
+            throw new Exception("Error writing activity log!");
         }
 
         // Lưu toàn bộ thay đổi
@@ -75,6 +75,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id'])) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 } else {
-    echo json_encode(['success' => false, 'message' => 'Yêu cầu không hợp lệ']);
+    echo json_encode(['success' => false, 'message' => 'Invalid request']);
 }
 ?>

@@ -12,14 +12,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     if ($stmt = $db->prepare($query)) {
         $stmt->bind_param("i", $id);
         if ($stmt->execute()) {
-            echo json_encode(["status" => "success", "message" => "Đã xóa mã khuyến mãi thành công!"]);
+            echo json_encode(["status" => "success", "message" => "Promotion deleted successfully!"]);
         } else {
-            echo json_encode(["status" => "error", "message" => "Lỗi khi xóa: " . $stmt->error]);
+            echo json_encode(["status" => "error", "message" => "Error deleting: " . $stmt->error]);
         }
         $stmt->close();
     }
     $db->close();
 } else {
-    echo json_encode(["status" => "error", "message" => "Yêu cầu không hợp lệ!"]);
+    echo json_encode(["status" => "error", "message" => "Invalid request!"]);
 }
 ?>

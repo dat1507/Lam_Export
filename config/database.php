@@ -10,7 +10,7 @@ class Database {
     public function getConnection() {
         $this->conn = new mysqli($this->host, $this->username, $this->password, $this->db_name);
         if ($this->conn->connect_error) {
-            die("Kết nối Database thất bại: " . $this->conn->connect_error);
+            die("Database connection failed: " . $this->conn->connect_error);
         }
         $this->conn->set_charset("utf8mb4");
         return $this->conn;

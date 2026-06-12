@@ -6,7 +6,7 @@ $database = new Database();
 $db = $database->getConnection();
 
 if (!isset($_GET['id'])) {
-    die("Không tìm thấy ID khuyến mãi!");
+    die("Promotion ID not found!");
 }
 
 $id = (int)$_GET['id'];
@@ -16,14 +16,14 @@ $stmt->execute();
 $promo = $stmt->get_result()->fetch_assoc();
 
 if (!$promo) {
-    die("Không tìm thấy chương trình khuyến mãi này!");
+    die("This promotion program was not found!");
 }
 ?>
 
 <div class="max-w-4xl mx-auto px-4 py-8 h-full">
     <div class="flex items-center gap-4 mb-6">
-        <a href="admin_promotions.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Trở về</a>
-        <h1 class="text-2xl font-bold text-[#1a2954]">✏️ Sửa chương trình: <?= htmlspecialchars($promo['promo_name']) ?></h1>
+        <a href="admin_promotions.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Back</a>
+        <h1 class="text-2xl font-bold text-[#1a2954]">✏️ Edit Campaign: <?= htmlspecialchars($promo['promo_name']) ?></h1>
     </div>
 
     <div id="alertMsg" class="hidden mb-4"></div>
@@ -35,41 +35,41 @@ if (!$promo) {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Tên chương trình</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Campaign Name</label>
                         <input type="text" name="promo_name" value="<?= htmlspecialchars($promo['promo_name']) ?>" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Mã Voucher</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Voucher Code</label>
                         <input type="text" name="promo_code" value="<?= htmlspecialchars($promo['promo_code']) ?>" required
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm uppercase">
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Loại Khuyến Mãi</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Discount Type</label>
                     <select id="promoTypeSelect" name="promo_type" required onchange="togglePromoFields()"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm bg-white">
-                        <option value="discount_amount" <?= $promo['promo_type'] === 'discount_amount' ? 'selected' : '' ?>>Giảm tiền mặt</option>
-                        <option value="discount_percent" <?= $promo['promo_type'] === 'discount_percent' ? 'selected' : '' ?>>Giảm theo phần trăm (%)</option>
-                        <option value="buy_x_get_y" <?= $promo['promo_type'] === 'buy_x_get_y' ? 'selected' : '' ?>>Mua X tặng Y</option>
+                        <option value="discount_amount" <?= $promo['promo_type'] === 'discount_amount' ? 'selected' : '' ?>>Discount Amount</option>
+                        <option value="discount_percent" <?= $promo['promo_type'] === 'discount_percent' ? 'selected' : '' ?>>Discount Percentage (%)</option>
+                        <option value="buy_x_get_y" <?= $promo['promo_type'] === 'buy_x_get_y' ? 'selected' : '' ?>>Buy X Get Y</option>
                     </select>
                 </div>
 
                 <div id="discountValueField" class="mb-6 <?= in_array($promo['promo_type'], ['discount_amount','discount_percent']) ? '' : 'hidden' ?>">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Giá trị giảm</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Discount Value</label>
                     <input type="number" name="discount_val" value="<?= $promo['discount_val'] ?>"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                 </div>
 
                 <div id="buyXgetYFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 <?= $promo['promo_type'] === 'buy_x_get_y' ? '' : 'hidden' ?>">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng MUA</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Buy Quantity</label>
                         <input type="number" name="buy_qty" value="<?= $promo['buy_qty'] ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Số lượng TẶNG</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Get Quantity</label>
                         <input type="number" name="get_qty" value="<?= $promo['get_qty'] ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm">
                     </div>
@@ -77,13 +77,13 @@ if (!$promo) {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Ngày bắt đầu</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Start Date</label>
                         <input type="datetime-local" name="start_date"
                             value="<?= !empty($promo['start_date']) ? date('Y-m-d\TH:i', strtotime($promo['start_date'])) : '' ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-600">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Ngày kết thúc</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">End Date</label>
                         <input type="datetime-local" name="end_date"
                             value="<?= !empty($promo['end_date']) ? date('Y-m-d\TH:i', strtotime($promo['end_date'])) : '' ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-sm text-gray-600">
@@ -98,18 +98,18 @@ if (!$promo) {
                             <div class="block bg-gray-300 w-10 h-6 rounded-full transition toggle-bg"></div>
                             <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
                         </div>
-                        <div class="ml-3 text-sm font-bold text-gray-700">Đang hoạt động</div>
+                        <div class="ml-3 text-sm font-bold text-gray-700">Active</div>
                     </label>
                 </div>
 
                 <div class="flex justify-end gap-3">
                     <a href="admin_promotions.php"
                         class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2.5 px-6 rounded-lg transition">
-                        Hủy
+                        Cancel
                     </a>
                     <button type="submit"
                         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition flex items-center gap-2">
-                        <span>💾</span> Lưu thay đổi
+                        <span>💾</span> Save Changes
                     </button>
                 </div>
             </form>
@@ -143,7 +143,7 @@ if (!$promo) {
 
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = 'Đang lưu...';
+        submitBtn.innerHTML = 'Saving...';
         submitBtn.disabled = true;
 
         let formData = new FormData(this);
@@ -162,15 +162,15 @@ if (!$promo) {
                 setTimeout(() => { window.location.href = 'admin_promotions.php'; }, 1200);
             } else {
                 alertEl.className = 'mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded font-bold';
-                alertEl.innerHTML = '❌ Lỗi: ' + data.message;
+                alertEl.innerHTML = '❌ Error: ' + data.message;
                 alertEl.classList.remove('hidden');
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
         })
         .catch(error => {
-            console.error('Lỗi:', error);
-            alert('Lỗi mạng hoặc server!');
+            console.error('Error:', error);
+            alert('Network or server error!');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         });

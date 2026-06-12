@@ -10,7 +10,7 @@ $sql_products = "
     SELECT 
         p.*, 
         c.category_name,
-        CONCAT('Tồn: ', p.quantity) AS stock_text
+        CONCAT('Stock: ', p.quantity) AS stock_text
     FROM products p 
     LEFT JOIN categories c ON p.category_id = c.id 
     ORDER BY p.product_name ASC
@@ -24,7 +24,7 @@ $result_products = mysqli_query($conn, $sql_products);
         
         <div class="w-full md:w-7/12 flex flex-col h-full p-4 md:p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Kho Sản Phẩm</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Product Catalog</h2>
             </div>
 
             <div class="mb-4 relative shadow-sm">
@@ -32,7 +32,7 @@ $result_products = mysqli_query($conn, $sql_products);
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
                 <input type="text" id="posSearch" 
-                    placeholder="Gõ mã, tên SP hoặc danh mục để tìm nhanh..." 
+                    placeholder="Type code, name or category to search..." 
                     class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-lg font-medium text-gray-700">
             </div>
 
@@ -46,12 +46,12 @@ $result_products = mysqli_query($conn, $sql_products);
                     <div class="product-card bg-white border border-gray-200 rounded-xl p-4 flex flex-col h-full shadow-sm hover:shadow-md transition relative" data-search="<?= $search_string ?>">
                         <div class="flex-1">
                             <div class="text-xs font-bold text-gray-500 mb-1">
-                                Mã: <span class="text-blue-600 break-all text-[11px]"><?= $pro['id'] ?></span>
+                                Code: <span class="text-blue-600 break-all text-[11px]"><?= $pro['id'] ?></span>
                             </div>
                             <h3 class="font-bold text-gray-800 text-sm leading-tight mb-2" title="<?= $pro['product_name'] ?>">
                                 <?= $pro['product_name'] ?>
                             </h3>
-                            <div class="text-[#f5b041] font-extrabold mb-1">Bán: <?= number_format($pro['price'], 0, ',', '.') ?>đ</div>
+                            <div class="text-[#f5b041] font-extrabold mb-1">Price: <?= number_format($pro['price'], 0, ',', '.') ?>đ</div>
                         </div>
                         
                         <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
@@ -59,22 +59,22 @@ $result_products = mysqli_query($conn, $sql_products);
                                 <?= $pro['stock_text'] ?>
                             </span>
                             <button id="btn_add_<?= trim($pro['id']) ?>" onclick="addToImport('<?= trim($pro['id']) ?>', '<?= htmlspecialchars(str_replace(["\r", "\n"], " ", trim($pro['product_name'])), ENT_QUOTES) ?>')" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">
-                                <i class="fas fa-download"></i> Chọn
+                                <i class="fas fa-download"></i> Select
                             </button>
                         </div>
                     </div>
                     <?php endwhile; ?>
                 </div>
-                <div id="no_product_msg" class="hidden text-center text-gray-500 mt-10 italic">Không tìm thấy sản phẩm nào!</div>
+                <div id="no_product_msg" class="hidden text-center text-gray-500 mt-10 italic">No products found!</div>
             </div>
         </div>
 
         <div class="w-full md:w-5/12 bg-white border-l border-gray-200 flex flex-col h-full shadow-lg z-20">
             <div class="p-4 border-b border-gray-100 bg-gray-50">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Nhà cung cấp:</label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Supplier:</label>
                 <div class="flex gap-2">
                     <select id="supplier_select" class="flex-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 text-sm font-medium">
-                        <option value="0">--- Chọn nhà cung cấp ---</option>
+                        <option value="0">--- Select Supplier ---</option>
                         <?php 
                         if($result_suppliers) {
                             mysqli_data_seek($result_suppliers, 0);
@@ -86,17 +86,17 @@ $result_products = mysqli_query($conn, $sql_products);
                         }
                         ?>
                     </select>
-                    <button onclick="document.getElementById('addSupplierModal').classList.remove('hidden')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition shadow-sm" title="Thêm Nhà Cung Cấp Mới">
+                    <button onclick="document.getElementById('addSupplierModal').classList.remove('hidden')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg transition shadow-sm" title="Add New Supplier">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-                <input type="text" id="import_note" placeholder="Ghi chú phiếu nhập (VD: Lô hàng tháng 10)..." class="w-full mt-3 p-2 border border-gray-300 rounded-lg text-sm">
+                <input type="text" id="import_note" placeholder="Import note (e.g. October batch)..." class="w-full mt-3 p-2 border border-gray-300 rounded-lg text-sm">
             </div>
 
             <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h3 class="font-bold text-lg text-gray-800">🧾 Chi tiết phiếu nhập</h3>
+                <h3 class="font-bold text-lg text-gray-800">🧾 Import Details</h3>
                 <button onclick="clearImport()" class="text-sm text-red-500 hover:text-red-700 font-medium transition">
-                    <i class="fas fa-trash-alt mr-1"></i>Hủy phiếu
+                    <i class="fas fa-trash-alt mr-1"></i>Cancel Import
                 </button>
             </div>
 
@@ -105,20 +105,20 @@ $result_products = mysqli_query($conn, $sql_products);
 
             <div class="p-4 bg-gray-50 border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Chiết khấu hóa đơn (VND)</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Invoice Discount (VND)</label>
                     <input type="number" name="discount_amount" id="discount_amount" value="0" min="0" step="1000" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="calculateTotal()">
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Tiền thuế VAT (VND)</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">VAT Tax (VND)</label>
                     <input type="number" name="tax_amount" id="tax_amount" value="0" min="0" step="1000" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="calculateTotal()">
                 </div>
                 <div class="flex justify-between text-xl font-bold text-emerald-600 mb-4">
-                    <span>TỔNG TIỀN NHẬP:</span>
+                    <span>TOTAL IMPORT AMOUNT:</span>
                     <span id="total_import_amount">0đ</span>
                 </div>
                 <button onclick="saveImport()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md hover:bg-emerald-700 transition text-base uppercase">
-                    <i class="fas fa-save mr-2"></i> HOÀN TẤT NHẬP KHO
+                    <i class="fas fa-save mr-2"></i> COMPLETE STOCK IMPORT
                 </button>
             </div>
         </div>
@@ -169,7 +169,7 @@ $result_products = mysqli_query($conn, $sql_products);
 
         function clearImport() {
             if(importCart.length === 0) return;
-            if(confirm('Hủy phiếu nhập này?')) {
+            if(confirm('Cancel this stock import?')) {
                 importCart = [];
                 renderImportCart();
             }
@@ -184,7 +184,7 @@ $result_products = mysqli_query($conn, $sql_products);
                 list.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10">
                         <i class="fas fa-box-open text-4xl mb-3 opacity-50"></i>
-                        <p class="italic">Chưa chọn sản phẩm nào...</p>
+                        <p class="italic">No products selected...</p>
                     </div>`;
                 totalEl.innerText = '0đ';
                 return;
@@ -204,16 +204,16 @@ $result_products = mysqli_query($conn, $sql_products);
                     
                     <div class="flex gap-2 items-center">
                         <div class="flex-1">
-                            <label class="text-[11px] text-gray-500 font-bold">Số lượng:</label>
+                            <label class="text-[11px] text-gray-500 font-bold">Quantity:</label>
                             <input type="number" min="1" value="${item.qty}" onchange="updateQty('${item.id}', this.value)" class="w-full p-1.5 text-center border border-gray-300 rounded font-bold text-sm focus:ring-emerald-500">
                         </div>
                         <div class="flex-[2]">
-                            <label class="text-[11px] text-gray-500 font-bold">Giá vốn/SP (đ):</label>
+                            <label class="text-[11px] text-gray-500 font-bold">Unit Cost (VND):</label>
                             <input type="text" value="${item.import_price}" onchange="updatePrice('${item.id}', this.value)" class="w-full p-1.5 text-right border border-gray-300 rounded font-bold text-sm text-blue-600 focus:ring-emerald-500">
                         </div>
                     </div>
                     <div class="text-right mt-2 text-sm font-bold text-emerald-600">
-                        Thành tiền: ${subtotal.toLocaleString('vi-VN')}đ
+                        Subtotal: ${subtotal.toLocaleString('en-US')}đ
                     </div>
                 </div>`;
             }).join('');
@@ -243,12 +243,12 @@ $result_products = mysqli_query($conn, $sql_products);
         
         // Gửi dữ liệu về db
         function saveImport() {
-            if (importCart.length === 0) return alert('Phiếu nhập trống!');
+            if (importCart.length === 0) return alert('Import list is empty!');
             
             const supplier_id = document.getElementById('supplier_select').value;
         
             if (!supplier_id || supplier_id === '0') {
-                alert('Chưa chọn nhà cung cấp!');
+                alert('Supplier has not been selected!');
                 document.getElementById('supplier_select').focus(); 
                 return; 
             }
@@ -278,10 +278,10 @@ $result_products = mysqli_query($conn, $sql_products);
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('✅Đã lưu phiếu nhập kho thành công! Mã phiếu: #' + data.import_id + '\nSố lượng hàng đã được cộng vào kho.');
+                    alert('✅ Stock import saved successfully! Import ID: #' + data.import_id + '\nProduct stock has been updated.');
                     location.reload();
                 } else {
-                    alert('❌Lỗi: ' + data.message);
+                    alert('❌ Error: ' + data.message);
                 }
             });
         }
@@ -292,14 +292,14 @@ $result_products = mysqli_query($conn, $sql_products);
             const address = document.getElementById('new_sup_address').value.trim();
 
             if (!name) {
-                alert('Nhập Tên Nhà cung cấp chứ!');
+                alert('Please enter the Supplier Name!');
                 return;
             }
 
             // change btn text
             const btnSave = event.target;
             const originalText = btnSave.innerHTML;
-            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             btnSave.disabled = true;
 
             fetch('ajax_add_supplier.php', {
@@ -334,19 +334,19 @@ $result_products = mysqli_query($conn, $sql_products);
                         document.getElementById('new_sup_address').value = '';
                         
                         // Thông báo
-                        alert('✅ Đã thêm Nhà cung cấp: ' + name);
+                        alert('✅ Supplier added: ' + name);
                     } else {
-                        alert('❌ Server báo lỗi: ' + data.message);
+                        alert('❌ Server error: ' + data.message);
                     }
                 } catch (e) {
-                    console.error('Lỗi phản hồi từ server:', text);
-                    alert('❌ Có lỗi ngầm từ PHP');
+                    console.error('Server response error:', text);
+                    alert('❌ Internal PHP error');
                 }
             })
             .catch(err => {
                 btnSave.innerHTML = originalText;
                 btnSave.disabled = false;
-                alert('❌ Lỗi kết nối mạng!');
+                alert('❌ Network connection error!');
             });
         }
 
@@ -392,7 +392,7 @@ $result_products = mysqli_query($conn, $sql_products);
                         searchBox.dispatchEvent(new Event('input')); // Kích hoạt lại hàm hiển thị lưới SP
                     }
                 } else {
-                    alert('⚠️ Không tìm thấy sản phẩm nào có mã: ' + scannedCode);
+                    alert('⚠️ No product found with code: ' + scannedCode);
                 }
             }
         });
@@ -409,7 +409,7 @@ $result_products = mysqli_query($conn, $sql_products);
             if (finalTotal < 0) finalTotal = 0;
         
             // 4. In ra giao diện
-            document.getElementById('total_import_amount').innerText = finalTotal.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('total_import_amount').innerText = finalTotal.toLocaleString('en-US') + 'đ';
             
             return finalTotal; 
         }
@@ -417,26 +417,26 @@ $result_products = mysqli_query($conn, $sql_products);
 
     <div id="addSupplierModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">➕ Thêm Nhà Cung Cấp Mới</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">➕ Add New Supplier</h3>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Tên NCC <span class="text-red-500">*</span></label>
-                    <input type="text" id="new_sup_name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: Công ty TNHH ABC...">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Supplier Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="new_sup_name" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. ABC Co., Ltd...">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Số điện thoại</label>
-                    <input type="text" id="new_sup_phone" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: 0909123456">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" id="new_sup_phone" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 0909123456">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Địa chỉ</label>
-                    <input type="text" id="new_sup_address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: 123 Lê Lợi, Quận 1...">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Address</label>
+                    <input type="text" id="new_sup_address" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 123 Le Loi, District 1...">
                 </div>
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
-                <button onclick="document.getElementById('addSupplierModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition">Hủy</button>
-                <button onclick="saveNewSupplier()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"><i class="fas fa-save mr-1"></i> Lưu lại</button>
+                <button onclick="document.getElementById('addSupplierModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition">Cancel</button>
+                <button onclick="saveNewSupplier()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition"><i class="fas fa-save mr-1"></i> Save</button>
             </div>
         </div>
     </div>

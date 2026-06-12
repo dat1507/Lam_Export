@@ -49,20 +49,20 @@ $logs = $stmt_logs->fetch_all(MYSQLI_ASSOC);
 
 <div class="max-w-7xl mx-auto px-4 py-8 flex-1 h-screen overflow-y-auto">
     <div class="flex items-center gap-4 mb-6">
-        <h1 class="text-2xl font-bold text-[#1a2954]">🕵️ Lịch sử Hoạt động</h1>
+        <h1 class="text-2xl font-bold text-[#1a2954]">🕵️ Activity Log</h1>
     </div>
 
     <form method="GET" action="" class="bg-white border border-gray-200 p-4 rounded-lg mb-6 flex flex-wrap gap-4 items-end shadow-sm">
     
         <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-bold text-gray-700 mb-1">🔍 Tìm ID SP, Tên NCC...</label>
-            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Nhập từ khóa và nhấn Enter..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <label class="block text-sm font-bold text-gray-700 mb-1">🔍 Search Product ID, Supplier name...</label>
+            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Enter keyword and press Enter..." class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
         </div>
 
         <div class="w-[220px]">
-            <label class="block text-sm font-bold text-gray-700 mb-1">⚡ Hành động</label>
+            <label class="block text-sm font-bold text-gray-700 mb-1">⚡ Action</label>
             <select name="action" onchange="this.form.submit()" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer">
-                <option value="">-- Tất cả hành động --</option>
+                <option value="">-- All Actions --</option>
                 <?php 
                 if (!empty($actions_list)) {
                     foreach ($actions_list as $act) {
@@ -75,22 +75,22 @@ $logs = $stmt_logs->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-1">📅 Từ ngày</label>
+            <label class="block text-sm font-bold text-gray-700 mb-1">📅 From Date</label>
             <input type="date" name="start_date" value="<?= htmlspecialchars($start_date) ?>" onchange="this.form.submit()" class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
         </div>
 
         <div>
-            <label class="block text-sm font-bold text-gray-700 mb-1">📅 Đến ngày</label>
+            <label class="block text-sm font-bold text-gray-700 mb-1">📅 To Date</label>
             <input type="date" name="end_date" value="<?= htmlspecialchars($end_date) ?>" onchange="this.form.submit()" class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
         </div>
 
         <div class="flex gap-2">
             <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
-                Lọc
+                Filter
             </button>
             
             <button type="button" onclick="window.location.href='admin_logs.php'" class="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg font-bold hover:bg-gray-300 transition flex items-center justify-center">
-                Xóa
+                Reset
             </button>
         </div>
     </form>
@@ -99,10 +99,10 @@ $logs = $stmt_logs->fetch_all(MYSQLI_ASSOC);
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-gray-100 text-gray-700 uppercase text-xs font-bold border-b">
-                    <th class="p-4 w-48">Thời gian</th>
-                    <th class="p-4 w-32">Tài khoản</th>
-                    <th class="p-4 w-48">Hành động</th>
-                    <th class="p-4">Chi tiết</th>
+                    <th class="p-4 w-48">Timestamp</th>
+                    <th class="p-4 w-32">Account</th>
+                    <th class="p-4 w-48">Action</th>
+                    <th class="p-4">Details</th>
                     <th class="p-4 w-32">IP</th>
                 </tr>
             </thead>
@@ -131,7 +131,7 @@ $logs = $stmt_logs->fetch_all(MYSQLI_ASSOC);
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" class="p-8 text-center text-gray-500">Chưa có hoạt động nào phù hợp với bộ lọc.</td>
+                        <td colspan="5" class="p-8 text-center text-gray-500">No activities match the filter criteria.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>

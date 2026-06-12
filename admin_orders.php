@@ -37,7 +37,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
 <body class="bg-gray-100 font-sans antialiased flex h-screen overflow-hidden">
 
     <div class="flex-1 p-8 overflow-y-auto relative">
-        <h2 class="text-3xl font-bold text-gray-800 mb-8">📜 Lịch Sử Hóa Đơn</h2>
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">📜 Order History</h2>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-white p-4 rounded-xl shadow-sm mb-6 flex justify-between items-center border border-gray-100">
@@ -48,17 +48,17 @@ $result_orders = mysqli_query($conn, $sql_orders);
                         </div>
                         <input type="text" name="search" 
                             value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
-                            placeholder="Gõ #MãĐơn (VD: #123) hoặc nhập Tên, SĐT khách..." 
+                            placeholder="Type #OrderID (e.g. #123) or enter customer Name, Phone..." 
                             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                     </div>
                     
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold transition whitespace-nowrap shadow-md">
-                        Tìm Kiếm
+                        Search
                     </button>
 
                     <?php if(isset($_GET['search']) && $_GET['search'] !== ''): ?>
                         <a href="admin_orders.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition whitespace-nowrap flex items-center">
-                            <i class="fas fa-times mr-1"></i> Hủy
+                            <i class="fas fa-times mr-1"></i> Cancel
                         </a>
                     <?php endif; ?>
                 </form>
@@ -66,12 +66,12 @@ $result_orders = mysqli_query($conn, $sql_orders);
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-100 text-gray-700 uppercase text-sm border-b">
-                        <th class="p-4 font-bold">Mã Đơn</th>
-                        <th class="p-4 font-bold">Thời Gian</th>
-                        <th class="p-4 font-bold">Khách Hàng</th>
-                        <th class="p-4 font-bold">Số điện thoại</th>
-                        <th class="p-4 font-bold text-right">Tổng Tiền</th>
-                        <th class="p-4 font-bold text-center">Thao tác</th>
+                        <th class="p-4 font-bold">Order ID</th>
+                        <th class="p-4 font-bold">Date & Time</th>
+                        <th class="p-4 font-bold">Customer</th>
+                        <th class="p-4 font-bold">Phone Number</th>
+                        <th class="p-4 font-bold text-right">Total Amount</th>
+                        <th class="p-4 font-bold text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
@@ -79,18 +79,18 @@ $result_orders = mysqli_query($conn, $sql_orders);
                         if($result_orders && mysqli_num_rows($result_orders) > 0):
                             while($order = mysqli_fetch_assoc($result_orders)): 
                                 $date = date('d/m/Y H:i', strtotime($order['order_date']));
-                                $customer_name_html = !empty($order['customer_name']) ? $order['customer_name'] : '<span class="text-gray-400 italic">Khách lẻ</span>';
-                                $customer_name_text = !empty($order['customer_name']) ? $order['customer_name'] : 'Khách lẻ'; 
+                                $customer_name_html = !empty($order['customer_name']) ? $order['customer_name'] : '<span class="text-gray-400 italic">Retail</span>';
+                                $customer_name_text = !empty($order['customer_name']) ? $order['customer_name'] : 'Retail'; 
                                 
-                                $phone_html = !empty($order['telephone']) ? $order['telephone'] : '<span class="text-gray-400 italic">Trống</span>';
+                                $phone_html = !empty($order['telephone']) ? $order['telephone'] : '<span class="text-gray-400 italic">Empty</span>';
 
                                 // XÁC ĐỊNH LOẠI ĐƠN HIỂN THỊ
-                                $badge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Lẻ</span>';
+                                $badge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Retail</span>';
                                 if ($order['sale_type'] === 'wholesale') {
                                     if ($order['status'] === 'Còn nợ') {
-                                        $badge = '<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">Sỉ - Ký gửi</span>';
+                                        $badge = '<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">Wholesale - Consignment</span>';
                                     } else {
-                                        $badge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Sỉ - TT Liền</span>';
+                                        $badge = '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Wholesale - Paid</span>';
                                     }
                                 }
                         ?>
@@ -104,12 +104,12 @@ $result_orders = mysqli_query($conn, $sql_orders);
                                 <td class="p-4 font-bold text-red-600 text-right"><?= number_format($order['total_amount'], 0, ',', '.') ?>đ</td>
                                 <td class="p-4 text-center">
                                     <button type="button" 
-                                            onclick="cancelOrder(<?= $order['order_id'] ?>)" 
-                                            class="text-red-600 hover:text-red-800 font-bold px-3 py-1 bg-red-50 hover:bg-red-100 rounded-lg transition mr-2">
-                                        <i class="fas fa-trash-alt mr-1"></i> Hủy đơn
+                                             onclick="cancelOrder(<?= $order['order_id'] ?>)" 
+                                             class="text-red-600 hover:text-red-800 font-bold px-3 py-1 bg-red-50 hover:bg-red-100 rounded-lg transition mr-2">
+                                        <i class="fas fa-trash-alt mr-1"></i> Cancel Order
                                     </button>
                                         <button onclick="viewDetails(<?= $order['order_id'] ?>, '<?= $customer_name_text ?>', '<?= $date ?>', <?= $order['total_amount'] ?>, '<?= $order['sale_type'] ?>', <?= $order['discount_amount'] ?? 0 ?>, <?= $order['paid_amount'] ?? 0 ?>, <?= $order['debt_amount'] ?? 0 ?>)" class="text-blue-600 hover:text-blue-800 font-bold px-3 py-1 bg-blue-50 rounded-lg">
-                                        Xem & In
+                                        View & Print
                                     </button>
                                 </td>
                             </tr>
@@ -118,7 +118,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
                         else: 
                         ?>
                         <tr>
-                            <td colspan="6" class="p-8 text-center text-gray-500 italic">Chưa có hóa đơn nào được bán ra.</td>
+                            <td colspan="6" class="p-8 text-center text-gray-500 italic">No invoices have been issued yet.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -130,27 +130,27 @@ $result_orders = mysqli_query($conn, $sql_orders);
     <div id="detailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-[#1a2954] p-4 text-white font-bold text-lg flex justify-between items-center">
-                <span id="modalTitle">Chi Tiết Hóa Đơn</span>
+                <span id="modalTitle">Order Details</span>
                 <button onclick="closeModal()" class="text-white hover:text-red-400 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 overflow-y-auto flex-1">
-                <div id="loading" class="text-center text-gray-500 hidden py-8">Đang tải dữ liệu...</div>
+                <div id="loading" class="text-center text-gray-500 hidden py-8">Loading data...</div>
                 
                 <table id="detailTable" class="w-full text-left border-collapse hidden">
                     <thead>
                         <tr class="bg-gray-100 text-gray-700 uppercase text-sm border-b">
-                            <th class="p-3 font-bold">Sản phẩm</th>
-                            <th class="p-3 font-bold text-center">SL</th>
-                            <th class="p-3 font-bold text-right">Đơn giá</th>
-                            <th class="p-3 font-bold text-right">Thành tiền</th>
+                            <th class="p-3 font-bold">Product</th>
+                            <th class="p-3 font-bold text-center">Qty</th>
+                            <th class="p-3 font-bold text-right">Unit Price</th>
+                            <th class="p-3 font-bold text-right">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody id="detailBody" class="divide-y divide-gray-200">
                         </tbody>
                     <tfoot>
                         <tr class="bg-gray-50 border-t-2 border-gray-300">
-                            <td colspan="3" class="p-3 font-bold text-right text-gray-700">TỔNG CỘNG:</td>
+                            <td colspan="3" class="p-3 font-bold text-right text-gray-700">GRAND TOTAL:</td>
                             <td id="modalTotal" class="p-3 font-bold text-red-600 text-right text-lg">0đ</td>
                         </tr>
                     </tfoot>
@@ -158,8 +158,8 @@ $result_orders = mysqli_query($conn, $sql_orders);
             </div>
             
             <div class="p-4 bg-gray-50 flex justify-end gap-3 border-t">
-                <button onclick="reprintBill()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300">In lại Bill</button>
-                <button onclick="closeModal()" class="px-6 py-2 bg-[#f5b041] text-[#1a2954] rounded-lg font-bold hover:bg-yellow-500">Đóng</button>
+                <button onclick="reprintBill()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300">Reprint Bill</button>
+                <button onclick="closeModal()" class="px-6 py-2 bg-[#f5b041] text-[#1a2954] rounded-lg font-bold hover:bg-yellow-500">Close</button>
             </div>
         </div>
     </div>
@@ -180,7 +180,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
 
     function viewDetails(orderId, customerName, orderDate, totalAmount, saleType, discountAmount, paidAmount, debtAmount) {
         modal.classList.remove('hidden');
-        title.innerText = `Chi Tiết Hóa Đơn #${orderId}`;
+        title.innerText = `Order Details #${orderId}`;
         loading.classList.remove('hidden');
         table.classList.add('hidden');
         tbody.innerHTML = '';
@@ -212,13 +212,13 @@ $result_orders = mysqli_query($conn, $sql_orders);
                             <tr class="hover:bg-gray-50">
                                 <td class="p-3">${item.product_name}</td>
                                 <td class="p-3 text-center font-medium">${item.quantity}</td>
-                                <td class="p-3 text-right">${parseInt(item.price).toLocaleString('vi-VN')}đ</td>
-                                <td class="p-3 text-right font-bold">${parseInt(item.subtotal).toLocaleString('vi-VN')}đ</td>
+                                <td class="p-3 text-right">${parseInt(item.price).toLocaleString('en-US')}đ</td>
+                                <td class="p-3 text-right font-bold">${parseInt(item.subtotal).toLocaleString('en-US')}đ</td>
                             </tr>
                         `;
                     }).join('');
                     
-                    totalAmountEl.innerText = total.toLocaleString('vi-VN') + 'đ';
+                    totalAmountEl.innerText = total.toLocaleString('en-US') + 'đ';
                 } else {
                     tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">${data.message}</td></tr>`;
                     table.classList.remove('hidden');
@@ -227,14 +227,14 @@ $result_orders = mysqli_query($conn, $sql_orders);
             })
             .catch(error => {
                 loading.classList.add('hidden');
-                alert("Có lỗi xảy ra khi tải dữ liệu!");
+                alert("An error occurred while loading data!");
             });
     }
 
     // 4. HÀM IN HÓA ĐƠN
     function reprintBill() {
         if (!currentPrintData) {
-            alert('Chưa có dữ liệu để in!');
+            alert('No data to print!');
             return; 
         }
 
@@ -263,24 +263,24 @@ $result_orders = mysqli_query($conn, $sql_orders);
                 </div>
                 
                 <div style="text-align: center; font-size: 13px; margin-bottom: 10px;">
-                    Đ/C: 02 Trần Thị Kỉ, Phường Quy Nhơn Nam, Gia Lai<br>
-                    SĐT: 0935.241.158
+                    Add: 02 Tran Thi Ki, Quy Nhon Nam Ward, Gia Lai<br>
+                    TEL: 0935.241.158
                 </div>
                 
                 <div style="font-size: 13px; text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px;">
-                    Hóa đơn: #${currentPrintData.orderId} - ${currentPrintData.orderDate}
+                    Invoice: #${currentPrintData.orderId} - ${currentPrintData.orderDate}
                 </div>
                 
                 <div style="font-size: 13px; margin-bottom: 10px; font-weight: bold;">
-                    Khách hàng: ${currentPrintData.customerName}
+                    Customer: ${currentPrintData.customerName}
                 </div>
                 
                 <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 1px dashed #000;">
-                            <th style="text-align: left; padding: 4px 0;">Sản Phẩm</th>
-                            <th style="text-align: right; padding: 4px 12px 4px 0; width: 40px;">SL</th>
-                            <th style="text-align: right; padding: 4px 0;">T.Tiền</th>
+                            <th style="text-align: left; padding: 4px 0;">Product</th>
+                            <th style="text-align: right; padding: 4px 12px 4px 0; width: 40px;">Qty</th>
+                            <th style="text-align: right; padding: 4px 0;">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -291,7 +291,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
                                     ${item.quantity}
                                 </td>
                                 <td style="text-align: right; padding: 4px 0; font-weight: bold;">
-                                    ${parseInt(item.subtotal).toLocaleString('vi-VN')}
+                                    ${parseInt(item.subtotal).toLocaleString('en-US')}
                                 </td>
                             </tr>
                         `).join('')}
@@ -299,34 +299,34 @@ $result_orders = mysqli_query($conn, $sql_orders);
                 </table>
                 
                 <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-size: 14px; font-weight: bold;">
-                    TỔNG HÀNG: ${totalGoods.toLocaleString('vi-VN')}đ
+                    SUBTOTAL: ${totalGoods.toLocaleString('en-US')}đ
                 </div>
                 
                 ${currentPrintData.saleType === 'wholesale' ? `
                     <div style="text-align: right; font-size: 13px; margin-top: 5px;">
-                        Chiết khấu: -${parseInt(currentPrintData.discountAmount || 0).toLocaleString('vi-VN')}đ
+                        Discount: -${parseInt(currentPrintData.discountAmount || 0).toLocaleString('en-US')}đ
                     </div>
                     <div style="text-align: right; font-size: 15px; font-weight: bold; margin-top: 5px; border-top: 1px solid #000; padding-top: 5px;">
-                        TỔNG HÓA ĐƠN: ${parseInt(currentPrintData.totalAmount).toLocaleString('vi-VN')}đ
+                        GRAND TOTAL: ${parseInt(currentPrintData.totalAmount).toLocaleString('en-US')}đ
                     </div>
                     <div style="text-align: right; font-size: 13px; margin-top: 5px;">
-                        Đã thanh toán: ${parseInt(currentPrintData.paidAmount || 0).toLocaleString('vi-VN')}đ
+                        Paid Amount: ${parseInt(currentPrintData.paidAmount || 0).toLocaleString('en-US')}đ
                     </div>
                     <div style="text-align: right; font-size: 14px; font-weight: bold; margin-top: 5px;">
-                        Còn nợ: ${parseInt(currentPrintData.debtAmount || 0).toLocaleString('vi-VN')}đ
+                        Debt Amount: ${parseInt(currentPrintData.debtAmount || 0).toLocaleString('en-US')}đ
                     </div>
                 ` : `
                     <div style="text-align: right; font-size: 15px; font-weight: bold; margin-top: 5px; border-top: 1px solid #000; padding-top: 5px;">
-                        TỔNG HÓA ĐƠN: ${parseInt(currentPrintData.totalAmount).toLocaleString('vi-VN')}đ
+                        GRAND TOTAL: ${parseInt(currentPrintData.totalAmount).toLocaleString('en-US')}đ
                     </div>
                 `}
                 <div style="text-align: center; font-size: 12px; margin-top: 15px; font-style: italic;">
                     LAM EXPORT - HTM TM&DV Quy Nhơn Xanh - LAM EXPORT<br>
-                    Cảm ơn quý khách. Hẹn gặp lại!
+                    Thank you. See you again!
                 </div>
                 
                 <div style="text-align: center; font-size: 13px; margin-top: 8px; font-weight: bold; border-top: 1px solid #000; padding-top: 5px;">
-                    *** BẢN IN LẠI ***
+                    *** REPRINT ***
                 </div>
             </div>
             `;
@@ -336,12 +336,12 @@ $result_orders = mysqli_query($conn, $sql_orders);
         document.body.insertAdjacentHTML('beforeend', billHtml);
         
         window.print();
-        alert('Đã in hóa đơn #' + currentPrintData.orderId + ' thành công');
+        alert('Printed invoice #' + currentPrintData.orderId + ' successfully');
         location.reload();
     }
     
     function cancelOrder(orderId) {
-        if (!confirm('Bạn có chắc chắn muốn hủy hóa đơn #' + orderId + '?\nHệ thống sẽ tự động hoàn lại số lượng kho và trừ công nợ cho khách.')) {
+        if (!confirm('Are you sure you want to cancel invoice #' + orderId + '?\nThe system will automatically restore stock levels and adjust the customer\'s debt.')) {
             return;
         }
 
@@ -359,15 +359,15 @@ $result_orders = mysqli_query($conn, $sql_orders);
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Đã hủy đơn hàng thành công!');
+                alert('Order cancelled successfully!');
                 location.reload(); // Tải lại trang để thấy status thành "Đã hủy"
             } else {
-                alert('Lỗi: ' + data.message);
+                alert('Error: ' + data.message);
             }
         })
         .catch(error => {
-            console.error('Lỗi kết nối:', error);
-            alert('Đã xảy ra lỗi hệ thống, vui lòng thử lại.');
+            console.error('Network error:', error);
+            alert('A system error occurred, please try again.');
         });
     }
 

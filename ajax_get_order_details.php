@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 require_once 'connect.php';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Thiếu mã hóa đơn']);
+    echo json_encode(['status' => 'error', 'message' => 'Missing invoice ID']);
     exit;
 }
 
@@ -27,9 +27,9 @@ if ($result) {
     if (count($details) > 0) {
         echo json_encode(['status' => 'success', 'details' => $details]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Hóa đơn này không có sản phẩm nào.']);
+        echo json_encode(['status' => 'error', 'message' => 'This invoice has no products.']);
     }
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Lỗi truy vấn Database: ' . mysqli_error($conn)]);
+    echo json_encode(['status' => 'error', 'message' => 'Database query error: ' . mysqli_error($conn)]);
 }
 ?>

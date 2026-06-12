@@ -25,9 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $get_qty = isset($_POST['get_qty']) ? (int)$_POST['get_qty'] : 0;
     }
 
-    // 3. Kiểm tra rỗng (Validate)
+    // 3. Validation
     if (empty($promo_name) || empty($promo_code) || empty($promo_type)) {
-        echo json_encode(["status" => "error", "message" => "Vui lòng nhập đầy đủ Tên, Mã code và Chọn loại khuyến mãi!"]);
+        echo json_encode(["status" => "error", "message" => "Please enter all required fields: Name, Code, and Discount Type!"]);
         exit();
     }
 
@@ -50,25 +50,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         );
 
         if ($stmt->execute()) {
-            echo json_encode(["status" => "success", "message" => "Thêm chương trình khuyến mãi thành công!"]);
+            echo json_encode(["status" => "success", "message" => "Promotion created successfully!"]);
         } else {
-            // Có thể lỗi do trùng lặp Mã Code (Unique)
-            $errorMsg = "Không thể lưu dữ liệu.";
-            if ($db->errno == 1062) { // 1062 là mã lỗi MySQL khi bị trùng key (Duplicate entry)
-                $errorMsg = "Mã Voucher này đã tồn tại, vui lòng chọn mã khác!";
+            // Duplicate code error
+            $errorMsg = "Unable to save promotion.";
+            if ($db->errno == 1062) {
+                $errorMsg = "This Voucher code already exists, please choose another!";
             } else {
-                $errorMsg .= " Chi tiết: " . $stmt->error;
+                $errorMsg .= " Details: " . $stmt->error;
             }
             echo json_encode(["status" => "error", "message" => $errorMsg]);
         }
         $stmt->close();
     } else {
-        echo json_encode(["status" => "error", "message" => "Lỗi hệ thống: " . $db->error]);
+        echo json_encode(["status" => "error", "message" => "System error: " . $db->error]);
     }
     
     $db->close();
 } else {
-    // Truy cập trái phép không qua method POST
-    echo json_encode(["status" => "error", "message" => "Yêu cầu không hợp lệ!"]);
+    // Unauthorized access
+    echo json_encode(["status" => "error", "message" => "Invalid request!"]);
 }
 ?>

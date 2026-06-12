@@ -31,9 +31,9 @@ if (!empty($cart)) {
         }
 
         if (isset($_SESSION['admin_username'])) {
-            $action = "Thanh toán hóa đơn";
+            $action = "Bill checkout";
             $formatted_total = number_format($total_amount, 0, ',', '.');
-            $details = "Đã thanh toán đơn hàng #" . $order_id . " - Tổng tiền: " . $formatted_total . "đ";
+            $details = "Paid order #" . $order_id . " - Total amount: " . $formatted_total . "đ";
             
             logActivity($conn, $_SESSION['admin_username'], $action, $details);
         }

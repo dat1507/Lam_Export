@@ -37,7 +37,7 @@ $sql_products = "
     SELECT 
         p.*, 
         c.category_name,
-        IF(p.quantity <= 0, 'Hết hàng', CONCAT('Tồn: ', p.quantity)) AS stock_text
+        IF(p.quantity <= 0, 'Out of stock', CONCAT('Stock: ', p.quantity)) AS stock_text
     FROM products p 
     LEFT JOIN categories c ON p.category_id = c.id 
     ORDER BY p.product_name ASC
@@ -51,7 +51,7 @@ $result_products = mysqli_query($conn, $sql_products);
         
         <div class="w-full md:w-7/12 flex flex-col h-full p-4 md:p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Sản phẩm</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Products</h2>
             </div>
 
             <div class="mb-4 relative shadow-sm">
@@ -59,7 +59,7 @@ $result_products = mysqli_query($conn, $sql_products);
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
                 <input type="text" id="posSearch" 
-                    placeholder="Gõ mã, tên SP hoặc danh mục để tìm nhanh..." 
+                    placeholder="Type code, product name or category to search quickly..." 
                     class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-lg font-medium text-gray-700">
             </div>
 
@@ -75,7 +75,7 @@ $result_products = mysqli_query($conn, $sql_products);
                     <div class="product-card bg-white border border-gray-200 rounded-xl p-4 flex flex-col h-full shadow-sm hover:shadow-md transition relative" data-search="<?= $search_string ?>">
                         <div class="flex-1">
                             <div class="text-xs font-bold text-gray-500 mb-1">
-                                Mã: <span class="text-blue-600 break-all text-[11px]"><?= $pro['id'] ?></span>
+                                Code: <span class="text-blue-600 break-all text-[11px]"><?= $pro['id'] ?></span>
                             </div>
                             
                             <h3 class="font-bold text-gray-800 text-sm leading-tight mb-2" title="<?= $pro['product_name'] ?>">
@@ -101,18 +101,18 @@ $result_products = mysqli_query($conn, $sql_products);
                                 <button id="btn_add_<?= htmlspecialchars(trim($pro['id']), ENT_QUOTES) ?>" 
                                         onclick="addToCart(<?= htmlspecialchars(json_encode(trim($pro['id'])), ENT_QUOTES) ?>, <?= htmlspecialchars(json_encode(trim($pro['product_name'])), ENT_QUOTES) ?>, <?= (float)$final_price ?: 0 ?>, <?= (int)$pro['quantity'] ?: 0 ?>)" 
                                         class="bg-blue-100 text-blue-700 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">
-                                    <i class="fas fa-plus"></i> Thêm
+                                    <i class="fas fa-plus"></i> Add
                                 </button>
                             <?php else: ?>
                                 <button id="btn_add_<?= trim($pro['id']) ?>" disabled data-name="<?= htmlspecialchars(trim($pro['product_name']), ENT_QUOTES) ?>" class="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-sm font-bold cursor-not-allowed">
-                                    Hết
+                                    Out
                                 </button>
                             <?php endif; ?>
                         </div>
                     </div>
                     <?php endwhile; ?>
                 </div>
-                <div id="no_product_msg" class="hidden text-center text-gray-500 mt-10 italic">Không tìm thấy sản phẩm nào!</div>
+                <div id="no_product_msg" class="hidden text-center text-gray-500 mt-10 italic">No products found!</div>
             </div>
         </div>
 
@@ -120,7 +120,7 @@ $result_products = mysqli_query($conn, $sql_products);
             <div class="p-4 border-b border-gray-100 bg-gray-50">
                 <div class="flex gap-2">
                     <select id="customer_select" class="flex-1 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                        <option value="0">Khách Vãng Lai</option>
+                        <option value="0">Walk-in Customer</option>
                         <?php 
                         mysqli_data_seek($result_customers, 0);
                         while($cus = mysqli_fetch_assoc($result_customers)): 
@@ -128,16 +128,16 @@ $result_products = mysqli_query($conn, $sql_products);
                             <option value="<?= $cus['customer_id'] ?>"><?= $cus['customer_name'] ?> - <?= $cus['telephone'] ?></option>
                         <?php endwhile; ?>
                     </select>
-                    <button onclick="openModal()" class="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm" title="Thêm khách mới">
+                    <button onclick="openModal()" class="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-blue-700 transition text-sm" title="Add new customer">
                         <i class="fas fa-user-plus"></i>
                     </button>
                 </div>
             </div>
 
             <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h3 class="font-bold text-lg text-gray-800">🧾 Đơn hàng hiện tại</h3>
+                <h3 class="font-bold text-lg text-gray-800">🧾 Current Order</h3>
                 <button onclick="clearCart()" class="text-sm text-red-500 hover:text-red-700 font-medium transition">
-                    <i class="fas fa-trash-alt mr-1"></i>Hủy đơn
+                    <i class="fas fa-trash-alt mr-1"></i>Cancel Order
                 </button>
             </div>
 
@@ -146,38 +146,38 @@ $result_products = mysqli_query($conn, $sql_products);
 
             <div class="p-4 bg-gray-50 border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-bold text-gray-700">Mã Khuyến Mãi:</span>
+                    <span class="text-sm font-bold text-gray-700">Promo Code:</span>
                     <div class="flex gap-2">
                         <input type="text" id="promo_code" placeholder="MUA10TANG1" 
                             class="w-32 px-3 py-1.5 border border-gray-300 rounded-lg text-sm uppercase focus:outline-none focus:border-blue-500 transition">
                         <button id="btn_apply_promo" onclick="applyPromo()" class="bg-green-100 text-green-700 hover:bg-green-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition">
-                            Áp dụng
+                            Apply
                         </button>
                     </div>
                 </div>
 
                 <div id="promo_discount_display" class="hidden flex justify-between items-center mb-2 text-green-600 text-sm font-bold">
-                    <span>Tiền trừ từ voucher:</span>
+                    <span>Voucher discount:</span>
                     <span id="promo_amount">-0đ</span>
                 </div>
 
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-bold text-gray-700">Giảm giá (%):</span>
+                    <span class="text-sm font-bold text-gray-700">Discount (%):</span>
                     <input type="number" id="discount_percent" min="0" max="100" value="0" oninput="renderCart()" 
                             class="w-20 px-3 py-1.5 border border-gray-300 rounded-lg text-right font-bold focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                 </div>
                 
                 <div class="flex justify-between text-xl font-bold text-red-600 mb-4">
-                    <span>TỔNG TIỀN:</span>
+                    <span>TOTAL AMOUNT:</span>
                     <span id="total_amount">0đ</span>
                 </div>
                 
                 <div class="flex gap-3">
                     <button onclick="saveDraftAlert()" class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 rounded-xl hover:bg-gray-300 transition text-sm">
-                        <i class="fas fa-save mr-1"></i> Lưu Nháp
+                        <i class="fas fa-save mr-1"></i> Save Draft
                     </button>
                     <button onclick="checkout()" class="flex-[2] bg-[#f5b041] text-[#1a2954] font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition text-base uppercase">
-                        Thanh toán & In
+                        Checkout & Print
                     </button>
                 </div>
             </div>
@@ -187,24 +187,24 @@ $result_products = mysqli_query($conn, $sql_products);
     <div id="customerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-[#1a2954] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold text-lg"><i class="fas fa-user-plus mr-2"></i>Thêm khách hàng mới</h3>
+                <h3 class="font-bold text-lg"><i class="fas fa-user-plus mr-2"></i>Add new customer</h3>
                 <button onclick="closeModal()" class="text-gray-300 hover:text-white transition">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <div class="p-5 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng <span class="text-red-500">*</span></label>
-                    <input type="text" id="new_name" placeholder="Nhập tên khách..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer name <span class="text-red-500">*</span></label>
+                    <input type="text" id="new_name" placeholder="Enter customer name..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
-                    <input type="text" id="new_phone" placeholder="Nhập số điện thoại..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone number <span class="text-red-500">*</span></label>
+                    <input type="text" id="new_phone" placeholder="Enter phone number..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                 </div>
             </div>
             <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-                <button onclick="closeModal()" class="px-5 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition">Hủy</button>
-                <button onclick="saveCustomer()" class="px-5 py-2 bg-[#f5b041] text-[#1a2954] font-bold rounded-lg hover:shadow-md transition">Lưu khách hàng</button>
+                <button onclick="closeModal()" class="px-5 py-2 text-gray-600 font-medium hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                <button onclick="saveCustomer()" class="px-5 py-2 bg-[#f5b041] text-[#1a2954] font-bold rounded-lg hover:shadow-md transition">Save Customer</button>
             </div>
         </div>
     </div>
@@ -216,7 +216,7 @@ $result_products = mysqli_query($conn, $sql_products);
         const PROMO_RULES = <?= $promo_rules_json; ?>; 
         let activePromoCode = ""; 
 
-        console.log("Mã khuyến mãi hiện có:", PROMO_RULES);
+        console.log("Available promo rules:", PROMO_RULES);
         window.onload = function() {
             let savedCart = localStorage.getItem('posDraftCart');
             if (savedCart) {
@@ -230,12 +230,12 @@ $result_products = mysqli_query($conn, $sql_products);
             let btnEl = document.getElementById('btn_apply_promo');
             let inputCode = inputEl.value.trim().toUpperCase();
 
-            // Nếu đã có mã đang ạp dụng → Hủy mã
+            // Nếu đã có mã đang áp dụng → Hủy mã
             if (activePromoCode !== "") {
                 activePromoCode = "";
                 inputEl.value = "";
                 inputEl.disabled = false; 
-                btnEl.innerText = "Áp dụng"; 
+                btnEl.innerText = "Apply"; 
                 btnEl.className = "bg-green-100 text-green-700 hover:bg-green-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition";
                 renderCart();
                 return;
@@ -249,16 +249,16 @@ $result_products = mysqli_query($conn, $sql_products);
                 // Kiểm tra điều kiện đơn hàng tối thiểu
                 let subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
                 if (rule.min_order > 0 && subtotal < rule.min_order) {
-                    alert('Giá trị đơn hàng chưa đạt mức tối thiểu ' + rule.min_order.toLocaleString('vi-VN') + 'đ để áp dụng mã này!');
+                    alert('Order value has not reached the minimum of ' + rule.min_order.toLocaleString('vi-VN') + 'đ to apply this code!');
                     return;
                 }
                 activePromoCode = inputCode;
                 inputEl.disabled = true;
-                btnEl.innerText = "Hủy mã"; 
+                btnEl.innerText = "Cancel Code"; 
                 btnEl.className = "bg-red-100 text-red-700 hover:bg-red-600 hover:text-white px-3 py-1.5 rounded-lg text-sm font-bold transition";
                 renderCart();
             } else {
-                alert('Mã khuyến mãi không hợp lệ hoặc đã hết hạn!');
+                alert('Invalid or expired promo code!');
                 inputEl.value = "";
                 renderCart();
             }
@@ -271,12 +271,12 @@ $result_products = mysqli_query($conn, $sql_products);
 
         function saveDraftAlert() {
             saveDraft();
-            alert('Đã lưu nháp! Bạn có thể tải lại trang mà không mất đơn.');
+            alert('Draft saved! You can reload the page without losing the order.');
         }
 
         function clearCart() {
             if(cart.length === 0) return;
-            if(confirm('Xóa đơn hàng này?')) {
+            if(confirm('Delete this order?')) {
                 cart = [];
                 saveDraft();
                 renderCart();
@@ -291,7 +291,7 @@ $result_products = mysqli_query($conn, $sql_products);
             let currentQty = existingItem ? existingItem.qty : 0;
 
             if (currentQty + 1 > stock) {
-                alert(`Kho không đủ! Hiện chỉ còn ${stock} sản phẩm.`);
+                alert(`Insufficient stock! Only ${stock} items remaining.`);
                 return;
             }
 
@@ -317,7 +317,7 @@ $result_products = mysqli_query($conn, $sql_products);
             }
 
             if (newQty > existingItem.stock) {
-                alert(`Chỉ có thể bán tối đa ${existingItem.stock} sản phẩm này!`);
+                alert(`Can only sell a maximum of ${existingItem.stock} items for this product!`);
                 return;
             }
 
@@ -346,7 +346,7 @@ $result_products = mysqli_query($conn, $sql_products);
                 list.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10">
                         <i class="fas fa-shopping-basket text-4xl mb-3 opacity-50"></i>
-                        <p class="italic">Chưa có món nào...</p>
+                        <p class="italic">No items in cart...</p>
                     </div>`;
                 totalEl.innerText = '0đ';
                 if (subTotalEl) subTotalEl.classList.add('hidden');
@@ -458,7 +458,7 @@ $result_products = mysqli_query($conn, $sql_products);
         function saveCustomer() {
             const name = document.getElementById('new_name').value;
             const phone = document.getElementById('new_phone').value;
-            if (!name || !phone) return alert('Nhập đủ thông tin khách!');
+            if (!name || !phone) return alert('Please enter all customer details!');
 
             const formData = new FormData();
             formData.append('name', name);
@@ -473,13 +473,13 @@ $result_products = mysqli_query($conn, $sql_products);
                     select.add(opt);
                     select.value = data.id;
                     closeModal();
-                    alert('Đã thêm khách mới thành công!');
+                    alert('New customer added successfully!');
                 }
             });
         }
 
         function checkout() {
-            if (cart.length === 0) return alert('Giỏ hàng trống!');
+            if (cart.length === 0) return alert('Cart is empty!');
 
             const customer_id = document.getElementById('customer_select').value;
             const total_amount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -505,10 +505,10 @@ $result_products = mysqli_query($conn, $sql_products);
                     localStorage.removeItem('posDraftCart');
                     cart = [];
                     renderCart();
-                    alert('Đã thanh toán và lưu hóa đơn #' + data.order_id);
+                    alert('Payment successful and receipt saved #' + data.order_id);
                     location.reload();
                 } else {
-                    alert('Lỗi lưu hóa đơn!');
+                    alert('Error saving receipt!');
                 }
             });
         }
@@ -534,23 +534,23 @@ $result_products = mysqli_query($conn, $sql_products);
                         LAM EXPORT - HTM TM&DV Quy Nhơn Xanh
                     </div>
                     <div style="text-align: center; font-size: 13px; margin-bottom: 10px;">
-                        Đ/C: 02 Trần Thị Kỉ, Phường Quy Nhơn Nam, Gia Lai<br>
-                        SĐT: 0935.241.158
+                        Add: 02 Tran Thi Ki, Quy Nhon Nam Ward, Gia Lai<br>
+                        Phone: 0935.241.158
                     </div>
                     
                     <div style="font-size: 13px; text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 5px;">
-                        Hóa đơn: #${orderId} - ${now}
+                        Invoice: #${orderId} - ${now}
                     </div>
                     <div style="font-size: 13px; margin-bottom: 10px; font-weight: bold;">
-                        Khách hàng: ${customerName}
+                        Customer: ${customerName}
                     </div>
                     
                     <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 1px dashed #000;">
-                                <th style="text-align: left; padding: 4px 0;">Sản Phẩm</th>
-                                <th style="text-align: right; padding: 4px 12px 4px 0; width: 40px;">SL</th>
-                                <th style="text-align: right; padding: 4px 0;">T.Tiền</th>
+                                <th style="text-align: left; padding: 4px 0;">Product</th>
+                                <th style="text-align: right; padding: 4px 12px 4px 0; width: 40px;">Qty</th>
+                                <th style="text-align: right; padding: 4px 0;">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -568,7 +568,7 @@ $result_products = mysqli_query($conn, $sql_products);
                     
                     <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; font-size: 13px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span>Tổng phụ:</span>
+                            <span>Subtotal:</span>
                             <span>${cart.reduce((sum, item) => sum + (item.price * item.qty), 0).toLocaleString('vi-VN')}</span>
                         </div>
                         
@@ -580,19 +580,20 @@ $result_products = mysqli_query($conn, $sql_products);
                         
                         ${(document.getElementById('discount_percent').value > 0) ? `
                         <div style="display: flex; justify-content: space-between; margin-bottom: 5px; color: #555;">
-                            <span>Giảm giá (${document.getElementById('discount_percent').value}%):</span>
+                            <span>Discount (${document.getElementById('discount_percent').value}%):</span>
                             <span>-${((cart.reduce((sum, item) => sum + (item.price * item.qty), 0) * document.getElementById('discount_percent').value) / 100).toLocaleString('vi-VN')}</span>
                         </div>` : ''}
                     </div>
 
                     <div style="border-top: 1px solid #000; padding-top: 5px; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">
-                        <span>TỔNG THU:</span>
+                        <span>TOTAL:</span>
                         <span>${globalFinalTotal.toLocaleString('vi-VN')}đ</span>
                     </div>
 
                     <div style="text-align: center; font-size: 12px; margin-top: 15px; font-style: italic;">
                         LAM EXPORT - HTM TM&DV Quy Nhơn Xanh<br>
-                        Cảm ơn quý khách. Hẹn gặp lại!
+                        Thank you. See you again!
+                    </div>
                 </div>
             `;
 
@@ -630,7 +631,7 @@ $result_products = mysqli_query($conn, $sql_products);
                 if (btnAdd) {
                     if (btnAdd.hasAttribute('disabled') || btnAdd.disabled) {
                         let spName = btnAdd.getAttribute('data-name') || scannedCode;
-                        alert('Không thể thêm: Sản phẩm [' + spName + '] hiện đã hết hàng trong kho!');
+                        alert('Cannot add: Product [' + spName + '] is currently out of stock!');
                     } else {
                         // Nếu còn hàng thì gọi click bình thường
                         btnAdd.click(); 
@@ -642,7 +643,7 @@ $result_products = mysqli_query($conn, $sql_products);
                         }
                     }
                 } else {
-                    alert('Không tìm thấy sản phẩm nào có mã: ' + scannedCode);
+                    alert('No product found with code: ' + scannedCode);
                 }
             }
         });

@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!$data) {
-    echo json_encode(['status' => 'error', 'message' => 'Không nhận được dữ liệu hợp lệ.']);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid data received.']);
     exit;
 }
 
@@ -23,7 +23,7 @@ $note = isset($data['note']) ? $db->real_escape_string($data['note']) : '';
 $items = isset($data['items']) ? $data['items'] : [];
 
 if ($customer_id === 0 || empty($items)) {
-    echo json_encode(['status' => 'error', 'message' => 'Dữ liệu không đầy đủ.']);
+    echo json_encode(['status' => 'error', 'message' => 'Incomplete data.']);
     exit;
 }
 
@@ -61,7 +61,7 @@ try {
                   VALUES ($customer_id, '$customer_name', $final_amount, $discount_amount, '$status', '$sale_type', $paid_amount, $debt_amount)";
     
     if (!$db->query($sql_order)) {
-        throw new Exception("Lỗi khi tạo đơn hàng: " . $db->error);
+        throw new Exception("Error creating order: " . $db->error);
     }
     
     $order_id = $db->insert_id; // Lấy ID của đơn hàng vừa tạo
@@ -82,19 +82,19 @@ try {
             $current_stock = intval($row_stock['quantity']);
             
             if ($qty > $current_stock) {
-                throw new Exception("Sản phẩm '$product_name' không đủ hàng! (Kho chỉ còn: $current_stock, Khách đặt: $qty)");
+                throw new Exception("Product '$product_name' has insufficient stock! (Stock: $current_stock, Ordered: $qty)");
             }
         } else {
-             throw new Exception("Lỗi: Không tìm thấy sản phẩm '$product_name' trong kho dữ liệu!");
+             throw new Exception("Error: Product '$product_name' not found in database!");
         }
 
-        $sold_items_log[] = $product_name . " (SL: " . $qty . ")";
+        $sold_items_log[] = $product_name . " (Qty: " . $qty . ")";
 
         $sql_detail = "INSERT INTO order_details (order_id, product_id, product_name, quantity, price, subtotal) 
                        VALUES ($order_id, '$product_id', '$product_name', $qty, $price, $subtotal)";
         
         if (!$db->query($sql_detail)) {
-            throw new Exception("Lỗi khi lưu chi tiết đơn: " . $db->error);
+            throw new Exception("Error saving order details: " . $db->error);
         }
         
         // Trừ tồn kho trong bảng products
@@ -106,19 +106,19 @@ try {
     if ($debt_amount > 0) {
         $sql_update_debt = "UPDATE customers SET total_debt = total_debt + $debt_amount WHERE customer_id = $customer_id";
         if (!$db->query($sql_update_debt)) {
-            throw new Exception("Lỗi khi cập nhật công nợ: " . $db->error);
+            throw new Exception("Error updating debt: " . $db->error);
         }
     }
 
    
     $nhan_vien = isset($_SESSION['admin_username']) ? $_SESSION['admin_username'] : 'Admin'; 
-    $hanh_dong = "Tạo đơn sỉ";
+    $hanh_dong = "Create wholesale order";
     
     // 2. Lấy IP của máy đang thao tác
     $ip_address = $_SERVER['REMOTE_ADDR'];
 
     // 3. Lấy ghi chú (nếu có)
-    $note_text = !empty($data['note']) ? $db->real_escape_string(trim($data['note'])) : "Không có";
+    $note_text = !empty($data['note']) ? $db->real_escape_string(trim($data['note'])) : "None";
 
     // 4. Format lại tiền và danh sách hàng hóa
     $fmt_total = number_format($final_amount, 0, ',', '.');
@@ -127,14 +127,14 @@ try {
     $list_products = implode(', ', $sold_items_log); // Nối các món hàng lại
     
     // 5. Lắp ráp nội dung log siêu chi tiết
-    $chi_tiet_log = "Bán sỉ (Đơn #$order_id) | Đại lý: $customer_name | Gồm: $list_products | Tổng: {$fmt_total}đ | Đã thu: {$fmt_paid}đ | Còn nợ: {$fmt_debt}đ | Ghi chú: $note_text";
+    $chi_tiet_log = "Wholesale (Order #$order_id) | Agency: $customer_name | Items: $list_products | Total: {$fmt_total}đ | Paid: {$fmt_paid}đ | Debt: {$fmt_debt}đ | Note: $note_text";
     
     // 6. Insert đúng vào bảng activity_logs
     $sql_log = "INSERT INTO activity_logs (username, action, details, ip_address) 
                 VALUES ('$nhan_vien', '$hanh_dong', '$chi_tiet_log', '$ip_address')";
                 
     if (!$db->query($sql_log)) {
-        throw new Exception("Lỗi khi ghi lịch sử hoạt động: " . $db->error);
+        throw new Exception("Error logging activity: " . $db->error);
     }
 
     // 6. Chốt hạ lưu vào Database

@@ -24,18 +24,18 @@ if (isset($_POST['id'])) {
         
         if (mysqli_query($conn, $query_delete)) {
             if (function_exists('logActivity')) {
-                logActivity($conn, $_SESSION['admin_username'], "Xóa sản phẩm", "Đã xóa sản phẩm: $product_name (ID: $product_id)");
+                logActivity($conn, $_SESSION['admin_username'], "Delete product", "Deleted product: $product_name (ID: $product_id)");
             }
             
-            $_SESSION['success_message'] = "Đã xóa sản phẩm thành công!";
+            $_SESSION['success_message'] = "Product deleted successfully!";
         } else {
-            $_SESSION['error_message'] = "Lỗi khi xóa khỏi Database: " . mysqli_error($conn);
+            $_SESSION['error_message'] = "Error deleting from Database: " . mysqli_error($conn);
         }
     } else {
-        $_SESSION['error_message'] = "Không tìm thấy sản phẩm này trong hệ thống!";
+        $_SESSION['error_message'] = "Product not found in the system!";
     }
 } else {
-    $_SESSION['error_message'] = "Thiếu thông tin ID sản phẩm!";
+    $_SESSION['error_message'] = "Product ID is missing!";
 }
 
 // Chuyển hướng về lại trang Quản lý sản phẩm

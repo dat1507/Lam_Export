@@ -4,7 +4,7 @@ require_once 'connect.php';
 require_once 'logger.php';
 
 if (!isset($_SESSION['admin_username'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Bạn chưa đăng nhập hoặc không có quyền!']);
+    echo json_encode(['status' => 'error', 'message' => 'You are not logged in or do not have permission!']);
     exit;
 }
 
@@ -23,24 +23,24 @@ if (isset($data['name']) && trim($data['name']) !== '') {
         $new_id = mysqli_insert_id($conn);
 
         if (function_exists('logActivity')) {
-            logActivity($conn, $_SESSION['admin_username'], "Thêm Nhà cung cấp", "Thêm nhanh NCC: $name (ID: $new_id)");
+            logActivity($conn, $_SESSION['admin_username'], "Add Supplier", "Quick add supplier: $name (ID: $new_id)");
         }
 
         echo json_encode([
             'status' => 'success',
             'id' => $new_id,
-            'message' => 'Đã thêm nhà cung cấp thành công!'
+            'message' => 'Supplier added successfully!'
         ]);
     } else {
         echo json_encode([
             'status' => 'error',
-            'message' => 'Lỗi khi lưu vào Database: ' . mysqli_error($conn)
+            'message' => 'Database save error: ' . mysqli_error($conn)
         ]);
     }
 } else {
     echo json_encode([
         'status' => 'error',
-        'message' => 'Tên nhà cung cấp không được để trống!'
+        'message' => 'Supplier name cannot be empty!'
     ]);
 }
 ?>

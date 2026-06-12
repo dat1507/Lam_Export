@@ -7,7 +7,7 @@ $db = $database->getConnection();
 $message = '';
 
 if (!isset($_GET['id'])) {
-    die("Không tìm thấy ID sản phẩm cần sửa!");
+    die("Product ID to edit not found!");
 }
 $product_id = $_GET['id'];
 
@@ -18,7 +18,7 @@ $result = $stmt->get_result();
 $product = $result->fetch_assoc();
 
 if (!$product) {
-    die("Sản phẩm không tồn tại!");
+    die("Product does not exist!");
 }
 
 $catQuery = "SELECT id as category_id, category_name as category FROM categories";
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $checkStmt->bind_param("s", $new_id);
             $checkStmt->execute();
             if ($checkStmt->get_result()->num_rows > 0) {
-                throw new Exception("Mã sản phẩm (ID) '{$new_id}' đã tồn tại! Vui lòng chọn mã khác.");
+                throw new Exception("Product code (ID) '{$new_id}' already exists! Please choose another code.");
             }
         }
 
@@ -74,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($insertCatStmt->execute()) {
                 $cat_id = $insertCatStmt->insert_id; // Lấy ID vừa tạo
             } else {
-                throw new Exception("Lỗi khi lưu Danh mục mới vào DB: " . $insertCatStmt->error);
+                throw new Exception("Error saving new Category to DB: " . $insertCatStmt->error);
             }
         }
 
@@ -103,15 +103,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         );
 
         if ($updateStmt->execute()) {
-            $message = '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 font-bold">Cập nhật thành công!</div>';
+            $message = '<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 font-bold">Updated successfully!</div>';
             
-            $details = "Đã cập nhật thông tin sản phẩm: " . $_POST['product_name'];
+            $details = "Updated product info: " . $_POST['product_name'];
             if ($new_id !== $original_id) {
-                $details .= " (Có thay đổi Mã SP: " . $original_id . " ➔ " . $new_id . ")";
+                $details .= " (Changed Product ID: " . $original_id . " ➔ " . $new_id . ")";
             }
             
             $admin_user = isset($_SESSION['admin_username']) ? $_SESSION['admin_username'] : 'Admin_KhongXacDinh'; 
-            $action = "Sửa sản phẩm";
+            $action = "Edit product";
             
             $logQuery = "INSERT INTO activity_logs (username, action, details) VALUES (?, ?, ?)";
             $logStmt = $db->prepare($logQuery);
@@ -130,18 +130,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $catStmt = $db->query($catQuery);
             $categories = $catStmt->fetch_all(MYSQLI_ASSOC);
         } else {
-             throw new Exception("Lỗi khi cập nhật sản phẩm: " . $updateStmt->error);
+             throw new Exception("Error updating product: " . $updateStmt->error);
         }
     } catch(Exception $e) {
-        $message = '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 font-bold">❌ Lỗi: ' . $e->getMessage() . '</div>';
+        $message = '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 font-bold">❌ Error: ' . $e->getMessage() . '</div>';
     }
 }
 ?>
 
 <div class="max-w-7xl mx-auto px-4 py-8 flex-1 h-screen overflow-y-auto">
     <div class="flex items-center gap-4 mb-6">
-        <a href="admin_products.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Trở về</a>
-        <h1 class="text-2xl font-bold text-[#1a2954]">Sửa Sản Phẩm: <?= htmlspecialchars($product['product_name']) ?></h1>
+        <a href="admin_products.php" class="text-gray-500 hover:text-blue-600 font-bold text-xl">⬅ Back</a>
+        <h1 class="text-2xl font-bold text-[#1a2954]">Edit Product: <?= htmlspecialchars($product['product_name']) ?></h1>
     </div>
 
     <?= $message ?>
@@ -150,91 +150,91 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <div class="space-y-4">
-                <h3 class="font-bold text-lg text-blue-800 border-b pb-2">Thông tin cơ bản</h3>
+                <h3 class="font-bold text-lg text-blue-800 border-b pb-2">Basic Information</h3>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Mã SP (ID) *</label>
+                    <label class="block text-sm font-bold text-gray-700">Product Code (ID) *</label>
                     <input type="text" name="new_id" value="<?= htmlspecialchars($product['id']) ?>" required class="w-full border rounded-lg p-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition">
                     <input type="hidden" name="original_id" value="<?= htmlspecialchars($product['id']) ?>">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-gray-700">Tên Sản Phẩm *</label>
+                    <label class="block text-sm font-bold text-gray-700">Product Name *</label>
                     <input type="text" name="product_name" value="<?= htmlspecialchars($product['product_name']) ?>" required class="w-full border rounded-lg p-2.5">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Giá bán *</label>
+                        <label class="block text-sm font-bold text-gray-700">Selling Price *</label>
                         <input type="number" name="price" value="<?= $product['price'] ?>" required class="w-full border rounded-lg p-2.5">
                     </div>
                     <div>
-                        <label id="salePriceLabel" class="block text-sm font-bold text-gray-700">Giá Sale</label>
+                        <label id="salePriceLabel" class="block text-sm font-bold text-gray-700">Sale Price</label>
                         <input type="number" id="salePriceInput" name="sale_price" value="<?= $product['sale_price'] ?>" class="w-full border rounded-lg p-2.5 transition-all">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Trạng thái</label>
+                        <label class="block text-sm font-bold text-gray-700">Status</label>
                         <select name="status" class="w-full border rounded-lg p-2.5">
-                            <option value="available" <?= $product['status'] == 'available' ? 'selected' : '' ?>>Hiển thị</option>
-                            <option value="hidden" <?= $product['status'] == 'hidden' ? 'selected' : '' ?>>Ẩn</option>
+                            <option value="available" <?= $product['status'] == 'available' ? 'selected' : '' ?>>Available</option>
+                            <option value="hidden" <?= $product['status'] == 'hidden' ? 'selected' : '' ?>>Hidden</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Tồn Kho</label>
-                        <input type="text" name="quantity" value="<?= $product['quantity'] ?>" readonly class="w-full border border-gray-300 rounded p-2.5 bg-gray-200 cursor-not-allowed font-bold text-gray-600" title="Số lượng chỉ được thay đổi thông qua chức năng Nhập Kho">
+                        <label class="block text-sm font-bold text-gray-700">Stock</label>
+                        <input type="text" name="quantity" value="<?= $product['quantity'] ?>" readonly class="w-full border border-gray-300 rounded p-2.5 bg-gray-200 cursor-not-allowed font-bold text-gray-600" title="Stock quantity can only be changed via Stock Import">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Đơn vị tính</label>
-                        <input type="text" name="unit" value="<?= htmlspecialchars($product['unit']) ?>" class="w-full border rounded-lg p-2.5" placeholder="VD: Gói, Hộp, Chai">
+                        <label class="block text-sm font-bold text-gray-700">Unit</label>
+                        <input type="text" name="unit" value="<?= htmlspecialchars($product['unit']) ?>" class="w-full border rounded-lg p-2.5" placeholder="e.g., Pack, Box, Bottle">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Chứng nhận</label>
-                        <input type="text" name="certifications" value="<?= htmlspecialchars($product['certifications']) ?>" class="w-full border rounded-lg p-2.5" placeholder="VD: ISO, HACCP">
+                        <label class="block text-sm font-bold text-gray-700">Certifications</label>
+                        <input type="text" name="certifications" value="<?= htmlspecialchars($product['certifications']) ?>" class="w-full border rounded-lg p-2.5" placeholder="e.g., ISO, HACCP">
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Phân loại Danh mục *</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Category Classification *</label>
                     <select id="categorySelect" required class="w-full border rounded-lg p-2.5 bg-white">
-                        <option value="" data-id="">-- Chọn danh mục --</option>
+                        <option value="" data-id="">-- Select category --</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?= htmlspecialchars($cat['category']) ?>" data-id="<?= $cat['category_id'] ?>" <?= (trim($product['category_id']) == trim($cat['category_id'])) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($cat['category']) ?>
                             </option>
                         <?php endforeach; ?>
-                        <option value="new" class="font-bold text-blue-600 bg-blue-50">➕ TẠO DANH MỤC MỚI</option>
+                        <option value="new" class="font-bold text-blue-600 bg-blue-50">➕ CREATE NEW CATEGORY</option>
                     </select>
 
                     <input type="hidden" name="category" id="hiddenCategoryName" value="<?= htmlspecialchars($product['category']) ?>">
                     <input type="hidden" name="category_id" id="hiddenCategoryId" value="<?= htmlspecialchars($product['category_id']) ?>">
 
                     <div id="newCategoryBlock" class="hidden mt-2">
-                        <input type="text" id="newCategoryName" class="w-full border rounded-lg p-2.5 bg-white border-blue-400" placeholder="Nhập tên Danh mục mới (VD: Trà đặc sản) *">
+                        <input type="text" id="newCategoryName" class="w-full border rounded-lg p-2.5 bg-white border-blue-400" placeholder="Enter new Category name (e.g., Specialty Tea) *">
                     </div>
                 </div>
                 
                 <div class="flex gap-6 mt-4 p-4 bg-gray-50 border rounded-lg">
-                    <label><input type="checkbox" name="is_new" value="1" <?= $product['is_new'] ? 'checked' : '' ?>> SP Mới</label>
-                    <label><input type="checkbox" name="is_trending" value="1" <?= $product['is_trending'] ? 'checked' : '' ?>> Đang HOT</label>
-                    <label><input type="checkbox" id="isSaleCheckbox" name="is_sale" value="1" <?= $product['is_sale'] ? 'checked' : '' ?>> Đang Sale</label>
+                    <label><input type="checkbox" name="is_new" value="1" <?= $product['is_new'] ? 'checked' : '' ?>> New Product</label>
+                    <label><input type="checkbox" name="is_trending" value="1" <?= $product['is_trending'] ? 'checked' : '' ?>> Trending</label>
+                    <label><input type="checkbox" id="isSaleCheckbox" name="is_sale" value="1" <?= $product['is_sale'] ? 'checked' : '' ?>> On Sale</label>
                 </div>
             </div>
 
             <div class="space-y-4">
-                <h3 class="font-bold text-lg text-blue-800 border-b pb-2">Hình ảnh & Bài viết</h3>
+                <h3 class="font-bold text-lg text-blue-800 border-b pb-2">Images & Descriptions</h3>
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <p class="text-xs text-blue-600 mb-2 font-bold">(Để trống nếu không muốn đổi ảnh)</p>
+                    <p class="text-xs text-blue-600 mb-2 font-bold">(Leave blank if you do not want to change)</p>
                     <input type="hidden" name="old_image_url" value="<?= $product['image_url'] ?>">
                     <input type="hidden" name="old_image_url_2" value="<?= $product['image_url_2'] ?>">
                     <input type="hidden" name="old_image_url_3" value="<?= $product['image_url_3'] ?>">
                     <input type="hidden" name="old_image_url_4" value="<?= $product['image_url_4'] ?>">
                     
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Đổi Ảnh Chính 1</label>
+                        <label class="block text-sm font-bold text-gray-700">Change Main Image 1</label>
                         <div class="flex items-center gap-3 mt-1">
                             <input type="file" name="image_url" accept="image/*" class="flex-1 border border-gray-300 bg-white p-2 rounded-lg text-sm">
                             <?php if(!empty($product['image_url'])): ?> 
@@ -244,7 +244,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Đổi Ảnh phụ 2</label>
+                        <label class="block text-sm font-bold text-gray-700">Change Secondary Image 2</label>
                         <div class="flex items-center gap-3 mt-1">
                             <input type="file" name="image_url_2" accept="image/*" class="flex-1 border border-gray-300 bg-white p-2 rounded-lg text-sm">
                             <?php if(!empty($product['image_url_2'])): ?> 
@@ -254,7 +254,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Đổi Ảnh phụ 3</label>
+                        <label class="block text-sm font-bold text-gray-700">Change Secondary Image 3</label>
                         <div class="flex items-center gap-3 mt-1">
                             <input type="file" name="image_url_3" accept="image/*" class="flex-1 border border-gray-300 bg-white p-2 rounded-lg text-sm">
                              <?php if(!empty($product['image_url_3'])): ?> 
@@ -264,7 +264,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700">Đổi Ảnh phụ 4</label>
+                        <label class="block text-sm font-bold text-gray-700">Change Secondary Image 4</label>
                         <div class="flex items-center gap-3 mt-1">
                             <input type="file" name="image_url_4" accept="image/*" class="flex-1 border border-gray-300 bg-white p-2 rounded-lg text-sm">
                              <?php if(!empty($product['image_url_4'])): ?> 
@@ -274,15 +274,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div> 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Mô tả</label>
-                    <textarea name="des1" rows="5" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Nhập mô tả sản phẩm..."><?= htmlspecialchars($product['des1'] ?? '') ?></textarea>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Description</label>
+                    <textarea name="des1" rows="5" class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500" placeholder="Enter product description..."><?= htmlspecialchars($product['des1'] ?? '') ?></textarea>
                 </div>
             </div>
         </div>
 
         <div class="mt-8 pt-6 border-t text-right">
             <button type="submit" class="px-8 py-3 font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-md text-lg">
-                <i class="fas fa-save mr-2"></i> LƯU THAY ĐỔI
+                <i class="fas fa-save mr-2"></i> SAVE CHANGES
             </button>
         </div>
     </form>
@@ -299,13 +299,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (isSaleCheckbox.checked) {
                 salePriceInput.disabled = false;
                 salePriceInput.required = true;
-                salePriceLabel.innerHTML = 'Giá Sale <span class="text-red-600">*</span>';
+                salePriceLabel.innerHTML = 'Sale Price <span class="text-red-600">*</span>';
                 salePriceInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
                 salePriceInput.classList.add('bg-white');
             } else {
                 salePriceInput.disabled = true;
                 salePriceInput.required = false;
-                salePriceLabel.innerHTML = 'Giá Sale';
+                salePriceLabel.innerHTML = 'Sale Price';
                 salePriceInput.classList.add('bg-gray-200', 'cursor-not-allowed');
                 salePriceInput.classList.remove('bg-white');
             }

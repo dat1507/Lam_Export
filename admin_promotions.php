@@ -13,13 +13,13 @@ $result = $db->query($query);
 <div class="max-w-6xl mx-auto px-4 py-8 h-full flex flex-col">
     
     <div class="flex justify-between items-center mb-6 shrink-0">
-        <h1 class="text-2xl font-bold text-[#1a2954]">🎁 Quản Lý Khuyến Mãi</h1>
+        <h1 class="text-2xl font-bold text-[#1a2954]">🎁 Promotions Management</h1>
         <div class="relative w-full md:w-1/3">
-            <input type="text" id="searchPromo" placeholder="Gõ tên chương trình, hoặc mã code..." 
+            <input type="text" id="searchPromo" placeholder="Type program name, or promo code..." 
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition shadow-sm uppercase-search">
         </div>
         <a href="admin_promotions_add.php" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition flex items-center gap-2">
-            <span>+</span> Thêm Mã Mới
+            <span>+</span> Add Promotion
         </a>
     </div>
 
@@ -29,12 +29,12 @@ $result = $db->query($query);
                 
                 <thead class="bg-gray-100 text-gray-700 uppercase text-sm sticky top-0 z-10 outline outline-1 outline-gray-200 shadow-sm">
                     <tr>
-                        <th class="p-4 bg-gray-100">Mã CODE</th>
-                        <th class="p-4 bg-gray-100">Chương trình</th>
-                        <th class="p-4 bg-gray-100">Chi tiết ưu đãi</th>
-                        <th class="p-4 bg-gray-100">Thời gian áp dụng</th>
-                        <th class="p-4 text-center bg-gray-100">Trạng thái</th>
-                        <th class="p-4 text-center bg-gray-100">Hành động</th>
+                        <th class="p-4 bg-gray-100">Promo Code</th>
+                        <th class="p-4 bg-gray-100">Campaign Name</th>
+                        <th class="p-4 bg-gray-100">Discount Offer</th>
+                        <th class="p-4 bg-gray-100">Duration</th>
+                        <th class="p-4 text-center bg-gray-100">Status</th>
+                        <th class="p-4 text-center bg-gray-100">Actions</th>
                     </tr>
                 </thead>
                 
@@ -54,13 +54,13 @@ $result = $db->query($query);
                             
                             <td class="p-4 text-gray-700 font-semibold">
                                 <?php if($row['promo_type'] === 'discount_amount'): ?>
-                                    <span class="text-red-500">Giảm <?= number_format($row['discount_val'], 0, ',', '.') ?>đ</span>
+                                    <span class="text-red-500">Save <?= number_format($row['discount_val'], 0, ',', '.') ?>đ</span>
                                 <?php elseif($row['promo_type'] === 'discount_percent'): ?>
-                                    <span class="text-orange-500">Giảm <?= floatval($row['discount_val']) ?>%</span>
+                                    <span class="text-orange-500">Save <?= floatval($row['discount_val']) ?>%</span>
                                 <?php elseif($row['promo_type'] === 'buy_x_get_y'): ?>
-                                    <span class="text-purple-600">Mua <?= $row['buy_qty'] ?> Tặng <?= $row['get_qty'] ?></span>
+                                    <span class="text-purple-600">Buy <?= $row['buy_qty'] ?> Get <?= $row['get_qty'] ?></span>
                                 <?php else: ?>
-                                    Khác
+                                    Other
                                 <?php endif; ?>
                             </td>
                             
@@ -77,18 +77,18 @@ $result = $db->query($query);
                                         ? '<span class="text-gray-400">__/__/____</span>' 
                                         : date('d/m/Y H:i', strtotime($end_db));
 
-                                    echo "Từ: <strong class='text-gray-800'>$start</strong><br>Đến: <strong class='text-gray-800'>$end</strong>";
+                                    echo "From: <strong class='text-gray-800'>$start</strong><br>To: <strong class='text-gray-800'>$end</strong>";
                                     ?>
                             </td>
                             
                             <td class="p-4 text-center">
                                 <?php if($row['is_active'] == 1): ?>
                                     <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-200">
-                                        Đang chạy
+                                        Active
                                     </span>
                                 <?php else: ?>
                                     <span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold border border-gray-200">
-                                        Đã tắt
+                                        Inactive
                                     </span>
                                 <?php endif; ?>
                             </td>
@@ -96,10 +96,10 @@ $result = $db->query($query);
                             <td class="p-4 text-center">
                                 <div class="flex justify-center gap-2">
                                     <a href="admin_promotions_edit.php?id=<?= $row['id'] ?>" class="bg-blue-100 text-blue-600 hover:bg-blue-200 px-3 py-1.5 rounded-md text-sm font-semibold transition">
-                                        Sửa
+                                        Edit
                                     </a>
                                      <button onclick="deletePromotion(<?= $row['id'] ?>)" class="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1.5 rounded-md text-sm font-semibold transition">
-                                        Xóa
+                                        Delete
                                     </button>
                                 </div>
                             </td>
@@ -108,7 +108,7 @@ $result = $db->query($query);
                     <?php else: ?>
                         <tr>
                             <td colspan="6" class="p-8 text-center text-gray-500">
-                                Chưa có chương trình khuyến mãi nào
+                                No promotions created yet
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -136,7 +136,7 @@ $result = $db->query($query);
     });
 
     function deletePromotion(id){
-        if(confirm('Chắc chắn muốn xóa khuyến mãi này?')){
+        if(confirm('Are you sure you want to delete this promotion?')){
             let formData = new FormData();
             formData.append('id', id);
             fetch('ajax_delete_promotion.php', {
@@ -149,10 +149,10 @@ $result = $db->query($query);
                 alert(data.message);
                 location.reload(); // Tải lại trang để mất dòng vừa xóa
             } else {
-                alert('Lỗi: ' + data.message);
+                alert('Error: ' + data.message);
             }
         })
-        .catch(error => console.error('Lỗi:', error));
+        .catch(error => console.error('Error:', error));
     }   
     }
 </script>

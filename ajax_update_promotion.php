@@ -7,7 +7,7 @@
 require_once 'config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'message' => 'Yêu cầu không hợp lệ!']);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request!']);
     exit;
 }
 
@@ -34,7 +34,7 @@ if ($promo_type === 'discount_amount' || $promo_type === 'discount_percent') {
 }
 
 if (!$id || empty($promo_name) || empty($promo_code) || empty($promo_type)) {
-    echo json_encode(['status' => 'error', 'message' => 'Vui lòng nhập đầy đủ thông tin!']);
+    echo json_encode(['status' => 'error', 'message' => 'Please fill in all required fields!']);
     exit;
 }
 
@@ -53,7 +53,7 @@ $query = "UPDATE promotions SET
 $stmt = $db->prepare($query);
 
 if (!$stmt) {
-    echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống: ' . $db->error]);
+    echo json_encode(['status' => 'error', 'message' => 'System error: ' . $db->error]);
     exit;
 }
 
@@ -73,13 +73,13 @@ $stmt->bind_param("sssiidssii",
 );
 
 if ($stmt->execute()) {
-    echo json_encode(['status' => 'success', 'message' => 'Cập nhật khuyến mãi thành công!']);
+    echo json_encode(['status' => 'success', 'message' => 'Promotion updated successfully!']);
 } else {
-    $errorMsg = 'Không thể cập nhật.';
+    $errorMsg = 'Cannot update.';
     if ($db->errno == 1062) {
-        $errorMsg = 'Mã Voucher này đã tồn tại, vui lòng chọn mã khác!';
+        $errorMsg = 'This Voucher code already exists, please choose another!';
     } else {
-        $errorMsg .= ' Chi tiết: ' . $stmt->error;
+        $errorMsg .= ' Details: ' . $stmt->error;
     }
     echo json_encode(['status' => 'error', 'message' => $errorMsg]);
 }

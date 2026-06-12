@@ -28,7 +28,7 @@ if ($result_products) {
 
 <div class="max-w-[1400px] mx-auto px-4 py-8 flex-1 h-screen overflow-y-auto">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-[#1a2954]">📦 Tạo Đơn Bán Sỉ</h1>
+        <h1 class="text-2xl font-bold text-[#1a2954]">📦 Create Wholesale Order</h1>
     </div>
 
     <div class="flex flex-col lg:flex-row gap-6">
@@ -36,7 +36,7 @@ if ($result_products) {
         <div class="lg:w-2/3 flex flex-col gap-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 relative">
                 <div class="relative">
-                    <input type="text" id="search_product" onkeyup="filterProducts()" placeholder="Nhập tên sản phẩm để lên đơn..." class="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <input type="text" id="search_product" onkeyup="filterProducts()" placeholder="Type product name to add..." class="w-full border border-gray-300 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-blue-500 outline-none transition">
                     <span class="absolute left-3 top-3 text-gray-400">🔎</span>
                 </div>
                 
@@ -56,7 +56,7 @@ if ($result_products) {
                                  onclick="addToCart('<?= trim($p['id']) ?>', '<?= $safe_name ?>', <?= $p['wholesale_price'] ?>, '<?= $safe_unit ?>')">
                                 <div>
                                     <div class="font-bold text-gray-800"><?= $display_name ?></div>
-                                    <div class="text-xs text-gray-500 mt-1">Tồn kho: <span class="font-bold text-blue-600"><?= htmlspecialchars($p['stock']) ?></span> <?= htmlspecialchars($unit_val) ?></div>
+                                    <div class="text-xs text-gray-500 mt-1">Stock: <span class="font-bold text-blue-600"><?= htmlspecialchars($p['stock']) ?></span> <?= htmlspecialchars($unit_val) ?></div>
                                 </div>
                                 <div class="font-bold text-blue-600 text-right">
                                     <?= number_format($p['wholesale_price'], 0, ',', '.') ?> đ
@@ -66,7 +66,7 @@ if ($result_products) {
                             <div id="item_add_<?= trim($p['id']) ?>" data-disabled="true" data-name="<?= htmlspecialchars(trim($p['name']), ENT_QUOTES) ?>" class="p-3 border-b bg-gray-50 flex justify-between items-center product-item opacity-60 cursor-not-allowed">
                                 <div>
                                     <div class="font-bold text-gray-500 line-through"><?= $display_name ?></div>
-                                    <div class="text-xs text-red-500 mt-1 font-bold">Hết hàng</div>
+                                    <div class="text-xs text-red-500 mt-1 font-bold">Out of stock</div>
                                 </div>
                                 <div class="font-bold text-gray-400 text-right">
                                     <?= number_format($p['wholesale_price'], 0, ',', '.') ?> đ
@@ -81,69 +81,69 @@ if ($result_products) {
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-100 text-gray-700 uppercase text-xs font-bold border-b">
-                            <th class="p-3 w-12 text-center">STT</th>
-                            <th class="p-3">Sản phẩm</th>
-                            <th class="p-3 w-28 text-center">Số lượng</th>
-                            <th class="p-3 w-32 text-center">Đơn giá sỉ</th>
-                            <th class="p-3 w-36 text-right">Thành tiền</th>
+                            <th class="p-3 w-12 text-center">No.</th>
+                            <th class="p-3">Product</th>
+                            <th class="p-3 w-28 text-center">Quantity</th>
+                            <th class="p-3 w-32 text-center">Wholesale Price</th>
+                            <th class="p-3 w-36 text-right">Subtotal</th>
                             <th class="p-3 w-12 text-center"></th>
                         </tr>
                     </thead>
                     <tbody id="cart_body" class="text-sm divide-y divide-gray-200">
-                        <tr><td colspan="6" class="p-10 text-center text-gray-400 font-medium">🛒 Chưa có sản phẩm nào trong đơn hàng.</td></tr>
+                        <tr><td colspan="6" class="p-10 text-center text-gray-400 font-medium">🛒 No products in order.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
         <div class="lg:w-1/3 bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col h-fit">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">🧾 Thông tin Đơn Sỉ</h2>
+            <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">🧾 Wholesale Order Info</h2>
 
             <div class="mb-4">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Khách sỉ / Đại lý <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Wholesale Customer / Agency <span class="text-red-500">*</span></label>
                 <div class="flex gap-2">
                     <select id="customer_id" class="w-full overflow-hidden text-ellipsis whitespace-nowrap border border-gray-300 rounded p-2 outline-none focus:ring-1 focus:ring-blue-500">
-                        <option value="" data-address="">--- Chọn khách sỉ ---</option>
+                        <option value="" data-address="">--- Select Wholesale Customer ---</option>
                         <?php foreach ($customers as $cus): ?>
                             <option value="<?= $cus['customer_id'] ?>" data-address="<?= isset($cus['address']) ? htmlspecialchars($cus['address']) : '' ?>">
                                 <?= htmlspecialchars($cus['customer_name']) ?> - <?= htmlspecialchars($cus['telephone']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <button onclick="openAddCustomerModal()" class="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition font-bold shadow-sm flex items-center gap-1" title="Thêm đại lý mới">
+                    <button onclick="openAddCustomerModal()" class="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition font-bold shadow-sm flex items-center gap-1" title="Add new agency">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                        Thêm
+                        Add
                     </button>
                 </div>
             </div>
 
             <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Hình thức giao dịch</label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Transaction Type</label>
                 <div class="flex gap-6">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="transaction_type" value="Thanh toán liền" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm font-medium">Thanh toán liền</span>
+                        <span class="text-sm font-medium">Instant Payment</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="transaction_type" value="Ký gửi" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm font-medium">Ký gửi</span>
+                        <span class="text-sm font-medium">Consignment</span>
                     </label>
                 </div>
             </div>
 
             <div class="mb-6">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Ghi chú (Tùy chọn)</label>
-                <textarea id="order_note" rows="2" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ví dụ: Giao hỏa tốc, xuất VAT..."></textarea>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Note (Optional)</label>
+                <textarea id="order_note" rows="2" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="E.g. Fast shipping, VAT invoice..."></textarea>
             </div>
 
             <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
                 <div class="flex justify-between mb-3 text-gray-600">
-                    <span>Tổng tiền hàng:</span>
+                    <span>Total amount:</span>
                     <span class="font-bold text-lg text-black" id="total_amount_display">0 đ</span>
                 </div>
                 
                <div class="flex justify-between items-center mb-1 text-green-700">
-                    <span class="font-bold mt-1">Chiết khấu (%):</span>
+                    <span class="font-bold mt-1">Discount (%):</span>
                     <div class="relative">
                         <input type="number" id="discount_percent" oninput="calculateDebt()" value="0" min="0" max="100" class="w-24 text-right border border-green-300 rounded p-1.5 font-bold outline-none focus:ring-2 focus:ring-green-500 bg-white pr-7">
                         <span class="absolute right-2 top-2 text-green-600 font-bold">%</span>
@@ -151,55 +151,55 @@ if ($result_products) {
                 </div>
                 
                 <div class="flex justify-between mb-3 text-green-600 text-sm border-b border-blue-100 pb-2">
-                    <span class="italic">Tiền được giảm:</span>
+                    <span class="italic">Discount value:</span>
                     <span class="font-bold" id="discount_vnd_display">-0 đ</span>
                 </div>
 
                 <div class="flex justify-between mb-3 text-gray-800 border-t border-blue-200 pt-3">
-                    <span class="font-bold">KHÁCH CẦN TRẢ:</span>
+                    <span class="font-bold">CUSTOMER PAYS:</span>
                     <span class="font-bold text-xl text-blue-800" id="final_amount_display">0 đ</span>
                 </div>
 
                 <div class="flex justify-between items-center mb-3 text-blue-800">
-                    <span class="font-bold mt-1">Khách thanh toán:</span>
+                    <span class="font-bold mt-1">Paid amount:</span>
                     <input type="number" id="paid_amount" oninput="calculateDebt()" value="0" min="0" class="w-32 text-right border border-blue-300 rounded p-1.5 font-bold outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 </div>
 
                 <div class="flex justify-between mt-3 pt-3 border-t border-blue-200 text-red-600">
-                    <span class="font-bold">Tính vào công nợ:</span>
+                    <span class="font-bold">Add to Debt:</span>
                     <span class="font-bold text-xl" id="debt_amount_display">0 đ</span>
                 </div>
             </div>
 
             <button onclick="saveOrder()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-lg shadow-md hover:bg-blue-700 transition flex items-center justify-center gap-2 text-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                Xuất Hóa Đơn
+                Checkout & Print
             </button>
         </div>
     </div>
 
     <div id="addCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-[100] transition-opacity">
         <div class="bg-white p-6 rounded-xl w-96 shadow-2xl border border-blue-200">
-            <h3 class="text-lg font-bold text-blue-800 mb-4 border-b pb-2">➕ Thêm Đại Lý Mới</h3>
+            <h3 class="text-lg font-bold text-blue-800 mb-4 border-b pb-2">➕ Add New Agency</h3>
             
             <div class="mb-3">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Tên đại lý <span class="text-red-500">*</span></label>
-                <input type="text" id="new_cus_name" placeholder="Ví dụ: Đại lý Hà Nội..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Agency name <span class="text-red-500">*</span></label>
+                <input type="text" id="new_cus_name" placeholder="E.g. Hanoi Agency..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
             </div>
             
             <div class="mb-3">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
-                <input type="text" id="new_cus_phone" placeholder="Nhập SĐT..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Phone number <span class="text-red-500">*</span></label>
+                <input type="text" id="new_cus_phone" placeholder="Enter phone number..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
             </div>
 
             <div class="mb-5">
-                <label class="block text-sm font-bold text-gray-700 mb-1">Địa chỉ <span class="text-red-500">*</span></label>
-                <input type="text" id="new_cus_address" placeholder="Bắt buộc nhập địa chỉ..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Address <span class="text-red-500">*</span></label>
+                <input type="text" id="new_cus_address" placeholder="Address is required..." class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
             </div>
             
             <div class="flex justify-end gap-3">
-                <button onclick="closeAddCustomerModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-700 font-bold transition">Hủy</button>
-                <button onclick="saveNewCustomer()" id="btn_save_cus" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-white font-bold transition">Lưu & Chọn</button>
+                <button onclick="closeAddCustomerModal()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-gray-700 font-bold transition">Cancel</button>
+                <button onclick="saveNewCustomer()" id="btn_save_cus" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 text-white font-bold transition">Save & Select</button>
             </div>
         </div>
     </div>
@@ -207,34 +207,34 @@ if ($result_products) {
 
 <div id="print_receipt_area">
     <div class="receipt-header">
-        <h2>HỘ KINH DOANH SHOP VÂN HÙNG</h2>
-        <p><b>Chuyên phân phối hàng đạt chuẩn OCOP</b></p>
-        <p>Đ/c: 05 Lý Thường Kiệt, Phường Quy Nhơn Nam,  Gia Lai, Việt Nam - ĐT: 0935 241158</p>
+        <h2>SHOP VAN HUNG BUSINESS</h2>
+        <p><b>Distributor of OCOP Standard Products</b></p>
+        <p>Add: 05 Ly Thuong Kiet, Quy Nhon Nam Ward, Gia Lai, Vietnam - Tel: 0935 241158</p>
     </div>
     <div class="receipt-title">
-        HÓA ĐƠN BÁN HÀNG / PHIẾU XUẤT KHO
+        SALES INVOICE / DELIVERY SLIP
     </div>
     <div class="receipt-info">
-        <div><b>Khách hàng:</b> <span id="print_cus_name"></span></div>
-        <div><b>Ngày in:</b> <span id="print_date"></span></div>
+        <div><b>Customer:</b> <span id="print_cus_name"></span></div>
+        <div><b>Date:</b> <span id="print_date"></span></div>
     </div>
 
     <div class="receipt-info" style="margin-top: -10px;">
-        <div><b>Địa chỉ:</b> <span id="print_cus_address"></span></div>
+        <div><b>Address:</b> <span id="print_cus_address"></span></div>
     </div>
 
     <div class="receipt-info" style="margin-top: -10px;">
-        <div><b>Hình thức:</b> <span id="print_trans_type"></span></div>
+        <div><b>Payment Type:</b> <span id="print_trans_type"></span></div>
     </div>
     
     <table class="receipt-table">
         <thead>
             <tr>
-                <th style="width: 5%">STT</th>
-                <th style="width: 40%">Tên hàng hóa</th>
-                <th style="width: 10%">ĐVT</th> <th style="width: 10%">Số lượng</th>
-                <th style="width: 15%">Đơn giá (VNĐ)</th>
-                <th style="width: 20%">Thành tiền (VNĐ)</th>
+                <th style="width: 5%">No.</th>
+                <th style="width: 40%">Product Name</th>
+                <th style="width: 10%">Unit</th> <th style="width: 10%">Quantity</th>
+                <th style="width: 15%">Price (VND)</th>
+                <th style="width: 20%">Amount (VND)</th>
             </tr>
         </thead>
         <tbody id="print_cart_items">
@@ -243,23 +243,23 @@ if ($result_products) {
 
     <div class="receipt-summary">
         <div class="summary-row">
-            <span>Tổng tiền hàng:</span>
+            <span>Total merchandise:</span>
             <span id="print_total_order">0</span>
         </div>
         <div class="summary-row">
-            <span>Chiết khấu được giảm:</span>
+            <span>Discount amount:</span>
             <span id="print_discount">0</span>
         </div>
         <div class="summary-row bold">
-            <span>KHÁCH CẦN TRẢ:</span>
+            <span>CUSTOMER PAYS:</span>
             <span id="print_final_amount">0</span>
         </div>
         <div class="summary-row">
-            <span>Khách đã thanh toán:</span>
+            <span>Paid amount:</span>
             <span id="print_paid">0</span>
         </div>
         <div class="summary-row" style="color: #d93025; border-top: 1px dashed #000; padding-top: 5px;">
-            <span>Ghi nợ:</span>
+            <span>Debt:</span>
             <span id="print_debt">0</span>
         </div>
     </div>
@@ -334,7 +334,7 @@ if ($result_products) {
         tbody.innerHTML = '';
 
         if (cart.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-gray-400 font-medium">🛒 Chưa có sản phẩm nào trong đơn hàng.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-gray-400 font-medium">🛒 No products in order.</td></tr>';
             document.getElementById('total_amount_display').innerText = '0 đ';
             calculateDebt();
             return;
@@ -349,7 +349,7 @@ if ($result_products) {
             tr.innerHTML = `
                 <td class="p-3 text-center border-b text-gray-500">${index + 1}</td>
                 <td class="p-3 font-semibold text-gray-800 border-b">
-                    ${item.name} <br><span class="text-xs text-gray-400 font-normal">ĐVT: ${item.unit}</span>
+                    ${item.name} <br><span class="text-xs text-gray-400 font-normal">Unit: ${item.unit}</span>
                 </td>
                 <td class="p-3 text-center border-b">
                     <input type="number" min="1" value="${item.qty}" onchange="updateQty('${item.id}', this.value)" class="w-16 text-center border border-gray-300 rounded p-1 outline-none focus:ring-1 focus:ring-blue-500 bg-gray-50">
@@ -359,7 +359,7 @@ if ($result_products) {
                 </td>
                 <td class="p-3 text-right font-bold text-blue-600 border-b">${lineTotal.toLocaleString('vi-VN')} đ</td>
                 <td class="p-3 text-center border-b">
-                    <button onclick="removeFromCart('${item.id}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition" title="Xóa">
+                    <button onclick="removeFromCart('${item.id}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </td>
@@ -395,13 +395,13 @@ if ($result_products) {
 
     function saveOrder() {
         if (cart.length === 0) {
-            alert("Vui lòng chọn ít nhất 1 sản phẩm!");
+            alert("Please select at least 1 product!");
             return;
         }
 
         let customer_id = document.getElementById('customer_id').value;
         if (customer_id === "") {
-            alert("Vui lòng chọn khách sỉ / đại lý!");
+            alert("Please select a wholesale customer / agency!");
             return;
         }
 
@@ -413,7 +413,7 @@ if ($result_products) {
         let discount_amount_vnd = totalOrder * (discountPercent / 100);
 
         let btn = document.querySelector('button[onclick="saveOrder()"]');
-        btn.innerHTML = "⌛ ĐANG XỬ LÝ...";
+        btn.innerHTML = "⌛ PROCESSING...";
         btn.disabled = true;
 
         fetch('ajax_save_wholesale.php', {
@@ -442,6 +442,8 @@ if ($result_products) {
                 let now = new Date();
                 let printDate = now.toLocaleString('vi-VN');
                 let transType = document.querySelector('input[name="transaction_type"]:checked').value;
+                if (transType === 'Thanh toán liền') transType = 'Instant Payment';
+                else if (transType === 'Ký gửi') transType = 'Consignment';
                 let totalAmountDisplay = document.getElementById('total_amount_display').innerText;
 
                 let tbodyHTML = '';
@@ -461,7 +463,7 @@ if ($result_products) {
 
                 let printWindow = window.open('', '_blank', 'width=900,height=900');
                 
-                printWindow.document.write('<html><head><title>Hóa Đơn - Hộ Kinh Doanh Shop Vân Hùng</title>');
+                printWindow.document.write('<html><head><title>Invoice - Shop Van Hung Business</title>');
                 printWindow.document.write(`
                     <style>
                         body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; line-height: 1.5; position: relative; z-index: 1;}
@@ -500,36 +502,36 @@ if ($result_products) {
                          alt="Watermark Lam Export" />
                 `);
 
-               if (transType === "Ký gửi") {
+               if (transType === "Consignment") {
                         
                         let discountLabel = (typeof discountPercent !== 'undefined' && discountPercent > 0) 
-                            ? ` (Chiết khấu ${discountPercent}%)` 
+                            ? ` (Discount ${discountPercent}%)` 
                             : '';
 
                         printWindow.document.write(`
                             <div class="receipt-header">
-                                <h2>HỘ KINH DOANH SHOP VÂN HÙNG</h2>
-                                <p><b>Chuyên phân phối hàng đạt chuẩn OCOP</b></p>
-                                <p>Đ/c: 05 Lý Thường Kiệt, Phường Quy Nhơn Nam,  Gia Lai, Việt Nam - ĐT: 0935 241158</p>
+                                <h2>SHOP VAN HUNG BUSINESS</h2>
+                                <p><b>Distributor of OCOP Standard Products</b></p>
+                                <p>Add: 05 Ly Thuong Kiet, Quy Nhon Nam Ward, Gia Lai, Vietnam - Tel: 0935 241158</p>
                             </div>
-                            <div class="receipt-title">HÓA ĐƠN KÝ GỬI</div>
+                            <div class="receipt-title">CONSIGNMENT INVOICE</div>
                             <div class="receipt-info">
-                                <div><b>Khách hàng:</b> ${customerText}</div>
-                                <div><b>Ngày in:</b> ${printDate}</div>
+                                <div><b>Customer:</b> ${customerText}</div>
+                                <div><b>Date:</b> ${printDate}</div>
                             </div>
                             <div class="receipt-info" style="margin-top: -10px;">
-                                <div><b>Địa chỉ:</b> ${customerAddress}</div>
+                                <div><b>Address:</b> ${customerAddress}</div>
                             </div>
                             
                             <table class="receipt-table">
                                 <thead>
                                     <tr>
-                                        <th style="width: 5%">STT</th>
-                                        <th style="width: 40%">Tên hàng hóa</th>
-                                        <th style="width: 10%">ĐVT</th>
-                                        <th style="width: 10%">Số lượng</th>
-                                        <th style="width: 15%">Đơn giá (VNĐ)</th>
-                                        <th style="width: 20%">Thành tiền (VNĐ)</th>
+                                        <th style="width: 5%">No.</th>
+                                        <th style="width: 40%">Product Name</th>
+                                        <th style="width: 10%">Unit</th>
+                                        <th style="width: 10%">Quantity</th>
+                                        <th style="width: 15%">Price (VND)</th>
+                                        <th style="width: 20%">Amount (VND)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -539,41 +541,41 @@ if ($result_products) {
 
                             <div class="receipt-summary" style="width: 100%; float: none;">
                                <div class="summary-row" style="justify-content: flex-end; gap: 30px; font-size: 18px;">
-                                    <span>Tổng tiền hàng hóa:</span>
+                                    <span>Total merchandise:</span>
                                     <span>${totalAmountDisplay}</span>
                                 </div>
                                 <div class="summary-row bold" style="justify-content: flex-end; gap: 30px; font-size: 20px;">
-                                    <span>TỔNG TIỀN HÓA ĐƠN${discountLabel}:</span>
+                                    <span>TOTAL INVOICE${discountLabel}:</span>
                                     <span>${document.getElementById('final_amount_display').innerText}</span>
                                 </div>
                                 <div style="margin-top: 30px; font-size: 16px; font-weight: bold;">
-                                    <p>Ngày thanh toán tiếp theo: ......................................................................................</p>
+                                    <p>Next payment date: ......................................................................................</p>
                                 </div>
                             </div>
 
                             <div class="signature-area">
-                                <div class="signature-box" style="width: 50%;">Đại diện Hộ Kinh Doanh Shop Vân Hùng<p>(Ký, ghi rõ họ tên)</p></div>
-                                <div class="signature-box" style="width: 50%;">Khách hàng ký gửi<p>(Ký, ghi rõ họ tên)</p></div>
+                                <div class="signature-box" style="width: 50%;">Shop Van Hung Business Representative<p>(Signature, Full name)</p></div>
+                                <div class="signature-box" style="width: 50%;">Consignment Customer<p>(Signature, Full name)</p></div>
                             </div>
 
                             <div class="page-break"></div>
 
                             <div class="receipt-header" style="margin-top: 40px;">
-                                <h2>HỘ KINH DOANH SHOP VÂN HÙNG</h2>
+                                <h2>SHOP VAN HUNG BUSINESS</h2>
                             </div>
-                            <div class="receipt-title">PHIẾU QUẢN LÝ ĐỊA ĐIỂM KÝ GỬI</div>
+                            <div class="receipt-title">CONSIGNMENT LOCATION MANAGEMENT SLIP</div>
                             <div style="font-size: 18px; line-height: 2.5; padding: 0 20px;">
-                                <p><b>Tên khách hàng / Đại lý:</b> ${customerText}</p>
-                                <p><b>Địa chỉ đặt quầy ký gửi:</b> ${customerAddress}</p>
-                                <p><b>Người phụ trách / Quản lý:</b> .................................................................... <b>SĐT:</b> ...........................................</p>
-                                <p><b>Ngày bắt đầu ký gửi:</b> ${printDate.split(' ')[1] || printDate} -<b> Đến:</b> ...........................................</p>
-                                <p><b>Ghi chú tình trạng quầy kệ:</b> ........................................................................................................................</p>
+                                <p><b>Customer / Agency name:</b> ${customerText}</p>
+                                <p><b>Consignment Counter Address:</b> ${customerAddress}</p>
+                                <p><b>Person in charge / Manager:</b> .................................................................... <b>Phone:</b> ...........................................</p>
+                                <p><b>Consignment Start Date:</b> ${printDate.split(' ')[1] || printDate} -<b> Until:</b> ...........................................</p>
+                                <p><b>Counter/Shelf condition notes:</b> ........................................................................................................................</p>
                                 <p>..............................................................................................................................................................................</p>
                             </div>
                             
                             <div class="signature-area" style="margin-top: 80px;">
-                                <div class="signature-box" style="width: 50%;">Đại diện Hộ Kinh Doanh Shop Vân Hùng<p>(Ký, ghi rõ họ tên)</p></div>
-                                <div class="signature-box" style="width: 50%;">Người phụ trách địa điểm<p>(Ký, ghi rõ họ tên)</p></div>
+                                <div class="signature-box" style="width: 50%;">Shop Van Hung Business Representative<p>(Signature, Full name)</p></div>
+                                <div class="signature-box" style="width: 50%;">Location Person in Charge<p>(Signature, Full name)</p></div>
                             </div>
                         `);
                     
@@ -599,11 +601,11 @@ if ($result_products) {
                     printWindow.document.write(billContent);
                     printWindow.document.write(`
                         <div class="signature-area">
-                            <div class="signature-box">Người nhận hàng<p>(Ký, ghi rõ họ tên)</p></div>
-                            <div class="signature-box">Người giao hàng<p>(Ký, ghi rõ họ tên)</p></div>
-                            <div class="signature-box">Người lập phiếu<p>(Ký, ghi rõ họ tên)</p></div>
+                            <div class="signature-box">Receiver<p>(Signature, Full name)</p></div>
+                            <div class="signature-box">Courier<p>(Signature, Full name)</p></div>
+                            <div class="signature-box">Prepared By<p>(Signature, Full name)</p></div>
                         </div>
-                        <div class="receipt-footer">Cảm ơn quý khách đã tin tưởng và ủng hộ Hộ Kinh Doanh Shop Vân Hùng!</div>
+                        <div class="receipt-footer">Thank you for your business with Shop Van Hung Business!</div>
                     `);
                 }
 
@@ -618,15 +620,15 @@ if ($result_products) {
                 }, 500);
 
             } else {
-                alert("Lỗi: " + data.message);
-                btn.innerHTML = "CHỐT ĐƠN SỈ";
+                alert("Error: " + data.message);
+                btn.innerHTML = "Checkout & Print";
                 btn.disabled = false;
             }
         })
         .catch(error => {
-            console.error('Lỗi:', error);
-            alert("Không thể kết nối với máy chủ!");
-            btn.innerHTML = "CHỐT ĐƠN SỈ";
+            console.error('Error:', error);
+            alert("Cannot connect to server!");
+            btn.innerHTML = "Checkout & Print";
             btn.disabled = false;
         });
     }
@@ -650,12 +652,12 @@ if ($result_products) {
         let address = document.getElementById('new_cus_address').value.trim(); 
 
         if (!name || !phone || !address) {
-            alert("❌ Vui lòng nhập đầy đủ: Tên, Số điện thoại VÀ Địa chỉ cho Đại lý!");
+            alert("❌ Please enter all fields: Name, Phone number AND Address!");
             return;
         }
 
         let btn = document.getElementById('btn_save_cus');
-        btn.innerHTML = "Đang lưu..."; btn.disabled = true;
+        btn.innerHTML = "Saving..."; btn.disabled = true;
 
         let formData = new FormData();
         formData.append('name', name);
@@ -680,16 +682,16 @@ if ($result_products) {
                 select.appendChild(option);
                 select.value = data.id; 
                 closeAddCustomerModal();
-                btn.innerHTML = "Lưu & Chọn"; btn.disabled = false;
+                btn.innerHTML = "Save & Select"; btn.disabled = false;
             } else {
-                alert("Lỗi: " + (data.error || "Không xác định"));
-                btn.innerHTML = "Lưu & Chọn"; btn.disabled = false;
+                alert("Error: " + (data.error || "Unknown"));
+                btn.innerHTML = "Save & Select"; btn.disabled = false;
             }
         })
         .catch(err => {
             console.error(err);
-            alert("Lỗi kết nối máy chủ!");
-            btn.innerHTML = "Lưu & Chọn"; btn.disabled = false;
+            alert("Server connection error!");
+            btn.innerHTML = "Save & Select"; btn.disabled = false;
         });
     }
 
@@ -720,7 +722,7 @@ if ($result_products) {
             if (itemAdd) {
                 if (itemAdd.getAttribute('data-disabled') === "true") {
                     let spName = itemAdd.getAttribute('data-name') || scannedCode;
-                    alert('❌ Không thể thêm: Sản phẩm [' + spName + '] hiện đã hết hàng trong kho!');
+                    alert('❌ Cannot add: Product [' + spName + '] is currently out of stock!');
                 } else {
                     itemAdd.click(); 
                     let searchBox = document.getElementById('search_product');
@@ -730,7 +732,7 @@ if ($result_products) {
                     }
                 }
             } else {
-                alert('⚠️ Không tìm thấy sản phẩm nào có mã: ' + scannedCode);
+                alert('⚠️ No product found with code: ' + scannedCode);
             }
         }
     });

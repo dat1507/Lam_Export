@@ -5,7 +5,7 @@ require_once 'connect.php';
 $product_id = isset($_GET['id']) ? trim($_GET['id']) : '';
 
 if (empty($product_id)) {
-    die("Vui lòng cung cấp ID sản phẩm cần in tem.");
+    die("Please provide the product ID to print label.");
 }
 
 
@@ -14,16 +14,16 @@ $sql = "SELECT id, product_name, price FROM products WHERE id = '$safe_id' LIMIT
 $result = mysqli_query($conn, $sql);
 
 if (!$result || mysqli_num_rows($result) == 0) {
-    die("Không tìm thấy sản phẩm có mã: " . htmlspecialchars($product_id));
+    die("Product not found with code: " . htmlspecialchars($product_id));
 }
 
 $product = mysqli_fetch_assoc($result);
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>In Tem Mã Vạch</title>
+    <title>Print Barcode Label</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <style>
         @page {
@@ -134,7 +134,7 @@ $product = mysqli_fetch_assoc($result);
         <div class="barcode-container"><svg id="barcode1"></svg></div>
         <div class="price-id-block">
             <span class="product-id"><?= htmlspecialchars($product['id']) ?></span><br>
-            <span class="price"><?= number_format($product['price'], 0, ',', '.') ?> VNĐ/</span>
+            <span class="price"><?= number_format($product['price'], 0, ',', '.') ?> VND/</span>
         </div>
     </div>
 
@@ -145,7 +145,7 @@ $product = mysqli_fetch_assoc($result);
         <div class="barcode-container"><svg id="barcode2"></svg></div>
         <div class="price-id-block">
             <span class="product-id"><?= htmlspecialchars($product['id']) ?></span><br>
-            <span class="price"><?= number_format($product['price'], 0, ',', '.') ?> VNĐ/</span>
+            <span class="price"><?= number_format($product['price'], 0, ',', '.') ?> VND/</span>
         </div>
     </div>
 
