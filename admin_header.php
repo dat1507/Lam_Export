@@ -22,6 +22,17 @@ $_SESSION['last_activity'] = time();
 
 require_once 'logger.php';
 $current_page = basename($_SERVER['PHP_SELF']);
+
+// Detect active area for sidebar
+$is_order_history    = ($current_page === 'admin_orders.php' && (!isset($_GET['tab']) || $_GET['tab'] === 'orders'));
+$is_wholesale_req    = ($current_page === 'admin_orders.php' && isset($_GET['tab']) && $_GET['tab'] === 'wholesale');
+$orders_group_active = ($is_order_history || $is_wholesale_req);
+
+// Wholesale requests pending badge count
+require_once 'connect.php';
+$wq_nav_count = 0;
+$wq_nav_res = @mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM wholesale_requests WHERE request_status = 'Pending'");
+if ($wq_nav_res) $wq_nav_count = (int)mysqli_fetch_assoc($wq_nav_res)['cnt'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,6 +55,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Submenu animation */
+        .submenu { overflow: hidden; transition: max-height 0.25s ease, opacity 0.2s ease; }
+        .submenu.collapsed { max-height: 0 !important; opacity: 0; }
+        .submenu.expanded  { opacity: 1; }
+
+        /* Chevron rotation */
+        .chevron { transition: transform 0.25s ease; }
+        .chevron.open { transform: rotate(180deg); }
+
+        /* Active nav highlight */
+        .nav-active { background: rgba(251,191,36,0.15); color: #fbbf24; border-left: 2px solid #fbbf24; }
+        .nav-subactive { background: rgba(251,191,36,0.12); color: #fbbf24; }
     </style>
 </head>
 <body class="bg-slate-100 antialiased flex h-screen overflow-hidden">
@@ -67,44 +91,85 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <!-- Nav Items -->
         <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
 
+            <!-- ── ORDERS GROUP ── -->
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest px-3 py-2 mt-1">Orders</p>
-            <a href="admin_pos.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_pos.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+
+            <a href="admin_pos.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_pos.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-cash-register w-4 text-center opacity-70"></i>
                 <span>Retail POS</span>
             </a>
-            <a href="admin_wholesale.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_wholesale.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+
+            <a href="admin_wholesale.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_wholesale.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-truck-loading w-4 text-center opacity-70"></i>
                 <span>Wholesale Order</span>
             </a>
-            <a href="admin_orders.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_orders.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
-                <i class="fas fa-file-invoice w-4 text-center opacity-70"></i>
-                <span>Order History</span>
-            </a>
 
+            <!-- Order History (expandable group) -->
+            <div>
+                <!-- Parent trigger -->
+                <button id="orderHistoryToggle"
+                        onclick="toggleOrderHistory()"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= $orders_group_active ? 'bg-white/10 text-white' : 'hover:bg-white/5 hover:text-white' ?>">
+                    <i class="fas fa-file-invoice w-4 text-center opacity-70"></i>
+                    <span class="flex-1 text-left">Order History</span>
+                    <?php if ($wq_nav_count > 0): ?>
+                        <span class="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-1 shrink-0"><?= $wq_nav_count ?></span>
+                    <?php endif; ?>
+                    <i class="fas fa-chevron-down chevron text-slate-500 text-xs <?= $orders_group_active ? 'open' : '' ?>" id="orderHistoryChevron"></i>
+                </button>
+
+                <!-- Submenu -->
+                <div id="orderHistorySubmenu"
+                     class="submenu pl-4 mt-0.5 space-y-0.5 <?= $orders_group_active ? 'expanded' : 'collapsed' ?>"
+                     style="max-height: <?= $orders_group_active ? '200px' : '0' ?>;">
+
+                    <!-- Orders sub-item -->
+                    <a href="admin_orders.php?tab=orders"
+                       class="flex items-center gap-3 pl-3 pr-3 py-2 rounded-lg text-sm font-medium transition-all
+                              <?= $is_order_history ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white text-slate-400' ?>">
+                        <i class="fas fa-list-ul w-4 text-center opacity-70"></i>
+                        <span>All Orders</span>
+                    </a>
+
+                    <!-- Wholesale Requests sub-item -->
+                    <a href="admin_orders.php?tab=wholesale"
+                       class="flex items-center gap-3 pl-3 pr-3 py-2 rounded-lg text-sm font-medium transition-all
+                              <?= $is_wholesale_req ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white text-slate-400' ?>">
+                        <i class="fas fa-file-signature w-4 text-center opacity-70"></i>
+                        <span class="flex-1">Wholesale Requests</span>
+                        <?php if ($wq_nav_count > 0): ?>
+                            <span class="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center leading-none px-1 shrink-0"><?= $wq_nav_count ?></span>
+                        <?php endif; ?>
+                    </a>
+                </div>
+            </div>
+
+            <!-- ── INVENTORY GROUP ── -->
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest px-3 py-2 mt-3">Inventory</p>
-            <a href="admin_products.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= (in_array($current_page, ['admin_products.php','admin_product_add.php','admin_product_edit.php'])) ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_products.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= (in_array($current_page, ['admin_products.php','admin_product_add.php','admin_product_edit.php'])) ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-box w-4 text-center opacity-70"></i>
                 <span>Products</span>
             </a>
-            <a href="admin_import.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_import.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_import.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_import.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-warehouse w-4 text-center opacity-70"></i>
                 <span>Stock Import</span>
             </a>
-            <a href="admin_promotions.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_promotions.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_promotions.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_promotions.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-tags w-4 text-center opacity-70"></i>
                 <span>Promotions</span>
             </a>
 
+            <!-- ── REPORTS GROUP ── -->
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest px-3 py-2 mt-3">Reports</p>
-            <a href="admin_dashboard.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_dashboard.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_dashboard.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_dashboard.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-chart-bar w-4 text-center opacity-70"></i>
                 <span>Sales Dashboard</span>
             </a>
-            <a href="admin_customer.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_customer.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_customer.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_customer.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-users w-4 text-center opacity-70"></i>
                 <span>Customers</span>
             </a>
-            <a href="admin_logs.php" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_logs.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
+            <a href="admin_logs.php" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <?= ($current_page == 'admin_logs.php') ? 'bg-amber-400 text-blue-900' : 'hover:bg-white/5 hover:text-white' ?>">
                 <i class="fas fa-history w-4 text-center opacity-70"></i>
                 <span>Activity Log</span>
             </a>
@@ -134,7 +199,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA (opened by each admin page) -->
+    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 overflow-y-auto overflow-x-hidden">
         <div class="sticky top-0 z-10 bg-slate-100/80 backdrop-blur-sm border-b border-slate-200 px-6 py-3 flex items-center justify-between">
             <div class="text-sm text-slate-500">
@@ -145,4 +210,25 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 System Online
             </div>
         </div>
+
+    <script>
+    // ── Order History submenu toggle ──
+    function toggleOrderHistory() {
+        const submenu = document.getElementById('orderHistorySubmenu');
+        const chevron = document.getElementById('orderHistoryChevron');
+        const isOpen  = !submenu.classList.contains('collapsed');
+
+        if (isOpen) {
+            submenu.classList.remove('expanded');
+            submenu.classList.add('collapsed');
+            submenu.style.maxHeight = '0';
+            chevron.classList.remove('open');
+        } else {
+            submenu.classList.remove('collapsed');
+            submenu.classList.add('expanded');
+            submenu.style.maxHeight = '200px';
+            chevron.classList.add('open');
+        }
+    }
+    </script>
 <?php

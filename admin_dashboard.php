@@ -62,6 +62,24 @@ $res_low_stock = mysqli_query($conn, $sql_low_stock);
 $sql_recent = "SELECT order_id, customer_name, total_amount, status, order_date
                FROM orders ORDER BY order_date DESC LIMIT 5";
 $res_recent = mysqli_query($conn, $sql_recent);
+
+// Wholesale requests stats (create table if not exists first)
+$conn->query("
+    CREATE TABLE IF NOT EXISTS wholesale_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id VARCHAR(11) NOT NULL,
+        product_name VARCHAR(255) NOT NULL,
+        customer_name VARCHAR(150) NOT NULL,
+        phone_number VARCHAR(50) NOT NULL,
+        requested_quantity INT NOT NULL DEFAULT 1,
+        notes TEXT,
+        request_status ENUM('Pending','Confirmed','Rejected') NOT NULL DEFAULT 'Pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+");
+$wq_pending_res   = mysqli_query($conn, "SELECT COUNT(*) AS cnt FROM wholesale_requests WHERE request_status = 'Pending'");
+$wq_pending_count = $wq_pending_res ? (int)mysqli_fetch_assoc($wq_pending_res)['cnt'] : 0;
 ?>
 
 <div class="p-6 max-w-7xl mx-auto">
@@ -122,6 +140,19 @@ $res_recent = mysqli_query($conn, $sql_recent);
                 <p class="text-xs text-slate-400 mt-0.5">COGS: <?= number_format($tong_gia_von, 0, ',', '.') ?>đ</p>
             </div>
         </div>
+
+        <!-- Pending Wholesale Requests -->
+        <a href="admin_orders.php?tab=wholesale&wq_status=Pending"
+           class="bg-white rounded-2xl border-l-4 border-l-amber-400 border-slate-200 p-5 shadow-sm flex items-start gap-4 hover:shadow-md transition group">
+            <div class="w-11 h-11 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fas fa-file-signature text-amber-600"></i>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Wholesale Requests</p>
+                <p class="text-xl font-bold text-amber-600 mt-0.5"><?= $wq_pending_count ?> Pending</p>
+                <p class="text-xs text-slate-400 mt-0.5 group-hover:text-amber-500 transition">Click to review →</p>
+            </div>
+        </a>
     </div>
 
     <!-- BOTTOM GRID -->
